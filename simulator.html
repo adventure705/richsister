@@ -42,17 +42,20 @@
 
         input[type="range"] {
             -webkit-appearance: none;
+            appearance: none;
             background: transparent;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
+            appearance: none;
+            height: 24px;
+            width: 24px;
             border-radius: 50%;
             background: #6366f1;
-            margin-top: -6px;
+            margin-top: -10px;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
 
         input[type="range"]::-webkit-slider-runnable-track {
@@ -197,7 +200,7 @@
 
                 <!-- Main Chart -->
                 <div class="glass-panel p-6 rounded-2xl">
-                    <div style="height: 400px; position: relative;">
+                    <div class="h-[300px] md:h-[400px] relative">
                         <canvas id="growthChart"></canvas>
                     </div>
                 </div>
