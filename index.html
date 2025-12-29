@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Growth Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Outfit"', '"Noto Sans KR"', 'sans-serif'] },
+                    colors: {
+                        brand: { DEFAULT: '#6366f1', glow: '#818cf8' },
+                        dark: { bg: '#0f172a', card: '#1e293b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #cbd5e1;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #6366f1;
+            margin-top: -6px;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+        }
+
+        .num-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #475569;
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            width: 100%;
+            font-family: inherit;
+            text-align: right;
+        }
+
+        .num-input:focus {
+            outline: 2px solid #6366f1;
+            border-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">
+                    <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-brand-glow to-purple-400">Wealth</span>
+                    Simulator
+                </h1>
+                <p class="text-slate-400 mt-1">복리 효과 시각화 및 시뮬레이션</p>
+            </div>
+            <div class="hidden md:block">
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Controls Sidebar -->
+            <div class="lg:col-span-3 space-y-6">
+
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center">
+                        <i class="fas fa-sliders-h mr-2 text-brand"></i> 변수 설정
+                    </h2>
+
+                    <!-- Inputs -->
+                    <div class="space-y-6">
+
+                        <!-- Initial Capital -->
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">초기 투자금
+                                (Initial)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-slate-500">₩</span>
+                                <input type="text" id="input-initial" value="0" class="num-input pr-2">
+                            </div>
+                            <input type="range" id="range-initial" min="0" max="1000000000" step="10000000" value="0"
+                                class="w-full mt-2">
+                        </div>
+
+                        <!-- Return Rate -->
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">연 수익률
+                                (Rate)</label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl font-bold text-emerald-400" id="disp-rate">25%</span>
+                            </div>
+                            <input type="range" id="range-rate" min="1" max="100" step="0.5" value="25"
+                                class="w-full mt-2">
+                        </div>
+
+                        <!-- Annual Savings -->
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">매년 추가
+                                저축액</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-slate-500">₩</span>
+                                <input type="text" id="input-savings" value="100000000" class="num-input pr-2">
+                            </div>
+                            <input type="range" id="range-savings" min="0" max="500000000" step="1000000"
+                                value="100000000" class="w-full mt-2">
+                        </div>
+
+                        <!-- Savings Period -->
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">저축 기간
+                                (년)</label>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span id="disp-period" class="font-bold text-brand-glow">10년</span>
+                            </div>
+                            <input type="range" id="range-period" min="0" max="30" step="1" value="10" class="w-full">
+                        </div>
+
+                        <!-- Basic Info -->
+                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">시작
+                                    연도</label>
+                                <input type="number" id="input-start-year" value="2026" class="num-input">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">현재
+                                    나이</label>
+                                <input type="number" id="input-age" value="30" class="num-input">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button onclick="resetDefaults()"
+                        class="w-full mt-8 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl text-white font-bold transition">
+                        <i class="fas fa-undo mr-2"></i> 초기화
+                    </button>
+                </div>
+
+                <!-- Fast Summary -->
+                <div class="glass-panel p-6 rounded-2xl text-center">
+                    <p class="text-slate-400 text-sm mb-1">10년 후 예상 자산</p>
+                    <p class="text-2xl font-black text-white mb-4" id="stat-10y">-</p>
+
+                    <p class="text-slate-400 text-sm mb-1">20년 후 예상 자산</p>
+                    <p class="text-2xl font-black text-emerald-400 mb-4" id="stat-20y">-</p>
+
+                    <div class="border-t border-white/5 pt-4 mt-2">
+                        <p class="text-slate-400 text-sm mb-1">30년 후 (Final)</p>
+                        <p class="text-3xl font-black text-brand-glow" id="stat-30y">-</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Charts & Data -->
+            <div class="lg:col-span-9 space-y-6">
+
+                <!-- Main Chart -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Analysis Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
+                        <h3 class="text-slate-400 text-xs uppercase font-bold">총 원금 (Principal)</h3>
+                        <p class="text-2xl font-bold text-white mt-1" id="res-principal">-</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border-l-4 border-emerald-500">
+                        <h3 class="text-slate-400 text-xs uppercase font-bold">총 수익금 (Interest)</h3>
+                        <p class="text-2xl font-bold text-emerald-400 mt-1" id="res-interest">-</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
+                        <h3 class="text-slate-400 text-xs uppercase font-bold">수익 배수 (Multiple)</h3>
+                        <p class="text-2xl font-bold text-purple-400 mt-1" id="res-multiple">-</p>
+                    </div>
+                </div>
+
+                <!-- Detailed Table -->
+                <div class="glass-panel rounded-2xl overflow-hidden">
+                    <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                        <h3 class="font-bold text-white"><i class="fas fa-table mr-2"></i> 연도별 상세 내역</h3>
+                        <button onclick="downloadCSV()"
+                            class="text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600 transition">
+                            CSV 다운로드
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-[400px]">
+                        <table class="w-full text-sm text-right">
+                            <thead
+                                class="text-xs text-slate-400 bg-black/20 uppercase font-bold sticky top-0 backdrop-blur-md">
+                                <tr>
+                                    <th class="px-4 py-3 text-center">Year</th>
+                                    <th class="px-4 py-3 text-emerald-400">기초 자산</th>
+                                    <th class="px-4 py-3 text-blue-400">투자 수익</th>
+                                    <th class="px-4 py-3 text-yellow-400">추가 저축</th>
+                                    <th class="px-4 py-3 text-white">기말 자산 (Total)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="divide-y divide-white/5">
+                                <!-- Generated Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let params = {
+            initial: 0,
+            rate: 25,
+            savings: 100000000,
+            savingsPeriod: 10,
+            years: 30,
+            years: 30,
+            startYear: 2026,
+            age: 30
+        };
+
+        // --- Elements ---
+        const inputs = {
+            initial: document.getElementById('input-initial'),
+            initialRange: document.getElementById('range-initial'),
+            rate: document.getElementById('range-rate'),
+            savings: document.getElementById('input-savings'),
+            savingsRange: document.getElementById('range-savings'),
+            period: document.getElementById('range-period'),
+            startYear: document.getElementById('input-start-year'),
+            age: document.getElementById('input-age')
+        };
+
+        const displays = {
+            rate: document.getElementById('disp-rate'),
+            period: document.getElementById('disp-period'),
+            stat10: document.getElementById('stat-10y'),
+            stat20: document.getElementById('stat-20y'),
+            stat30: document.getElementById('stat-30y'),
+            resPrincipal: document.getElementById('res-principal'),
+            resInterest: document.getElementById('res-interest'),
+            resMultiple: document.getElementById('res-multiple'),
+        };
+
+        let chart;
+
+        // --- Init ---
+        function init() {
+            // Helper: bind formatted input
+            const bindFormatted = (key) => {
+                const el = inputs[key];
+                el.addEventListener('input', (e) => {
+                    // 1. Remove commas and non-digits
+                    let raw = e.target.value.replace(/[^0-9]/g, '');
+                    if (!raw) raw = '0';
+                    const num = parseInt(raw);
+
+                    // 2. Format back to display (Commaseparated)
+                    // Note: This resets cursor position to end, acceptable for this use case
+                    const formatted = num.toLocaleString();
+                    if (e.target.value !== formatted) {
+                        e.target.value = formatted;
+                    }
+
+                    // 3. Sync
+                    syncInput(key, num, true);
+                });
+            };
+
+            bindFormatted('initial');
+            bindFormatted('savings');
+
+            // Ranges
+            inputs.initialRange.addEventListener('input', (e) => syncInput('initial', e.target.value));
+            inputs.savingsRange.addEventListener('input', (e) => syncInput('savings', e.target.value));
+
+            inputs.rate.addEventListener('input', (e) => {
+                params.rate = parseFloat(e.target.value);
+                displays.rate.innerText = params.rate + '%';
+                update();
+            });
+
+            inputs.period.addEventListener('input', (e) => {
+                params.savingsPeriod = parseInt(e.target.value);
+                displays.period.innerText = params.savingsPeriod + '년';
+                update();
+            });
+
+            inputs.startYear.addEventListener('input', (e) => {
+                params.startYear = parseInt(e.target.value);
+                update();
+            });
+            inputs.age.addEventListener('input', (e) => {
+                params.age = parseInt(e.target.value);
+                update();
+            });
+
+
+            // Initial Formatting
+            inputs.initial.value = params.initial.toLocaleString();
+            inputs.savings.value = params.savings.toLocaleString();
+
+            // Init Chart
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: '총 자산 (Total)',
+                            data: [],
+                            borderColor: '#818cf8',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '누적 원금 (Principal)',
+                            data: [],
+                            borderColor: 'rgba(148, 163, 184, 0.5)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1' } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: (val) => val / 100000000 + '억'
+                            }
+                        }
+                    }
+                }
+            });
+
+            update();
+        }
+
+        function syncInput(key, val, fromText = false) {
+            val = parseInt(val) || 0;
+            params[key] = val;
+
+            if (fromText) {
+                // If typed, assume text input handles its own format, just sync slider
+                if (inputs[`${key}Range`]) inputs[`${key}Range`].value = val;
+            } else {
+                // If slider moved, update text input with comma
+                if (inputs[key]) inputs[key].value = val.toLocaleString();
+            }
+            update();
+        }
+
+        function resetDefaults() {
+            params.initial = 0;
+            params.rate = 25;
+            params.savings = 100000000;
+            params.savingsPeriod = 10;
+
+            params.startYear = 2026;
+            params.age = 30;
+
+            // Sync UI
+            inputs.initial.value = params.initial.toLocaleString();
+            inputs.initialRange.value = params.initial;
+            inputs.rate.value = params.rate;
+            inputs.savings.value = params.savings.toLocaleString();
+            inputs.savingsRange.value = params.savings;
+            inputs.period.value = params.savingsPeriod;
+            inputs.startYear.value = params.startYear;
+            inputs.age.value = params.age;
+
+            displays.rate.innerText = params.rate + "%";
+            displays.period.innerText = params.savingsPeriod + "년";
+
+            update();
+        }
+
+        // --- Core Logic ---
+        function calculate() {
+            const data = [];
+            let currentCapital = params.initial;
+            let totalPrincipal = params.initial;
+
+            for (let i = 0; i < params.years; i++) {
+                const year = params.startYear + i;
+                const age = params.age + i;
+
+                // Logic based on CSV:
+                // 1. Start with Current Capital (Invested)
+                // 2. Add Return
+                // 3. Add Savings
+                // 4. Result is Next Year's Capital
+
+                // However, strictly speaking:
+                // Year 1 Start: 200
+                // Return: 50
+                // Savings Add: 100
+                // Year 1 End: 350
+                // This '350' becomes Year 2 Start.
+
+                const invested = currentCapital;
+                const profit = invested * (params.rate / 100);
+                const savings = (i < params.savingsPeriod) ? params.savings : 0;
+                const total = invested + profit + savings;
+
+                data.push({
+                    year,
+                    age,
+                    invested,
+                    profit,
+                    savings,
+                    total,
+                    accumPrincipal: totalPrincipal
+                });
+
+                // Prepare next
+                currentCapital = total;
+                totalPrincipal += savings;
+            }
+            return data;
+        }
+
+        function update() {
+            const results = calculate();
+
+            // Update Stats
+            const fmt = (n) => new Intl.NumberFormat('ko-KR', { notation: "compact", maximumFractionDigits: 1 }).format(n);
+            const fmtFull = (n) => new Intl.NumberFormat('ko-KR').format(Math.round(n));
+
+            // Indices: 0->10yr data (Year 9 from start 0? No, 10th item is index 9)
+            // 2026(0) ... 2035(9) -> 10 years later means result of 2035?
+            // CSV showed: 2026, 2027... 2035 is index 9.
+
+            const getRes = (idx) => results[idx] ? results[idx].total : 0;
+
+            displays.stat10.innerText = '₩ ' + fmt(getRes(9));
+            displays.stat20.innerText = '₩ ' + fmt(getRes(19));
+            displays.stat30.innerText = '₩ ' + fmt(getRes(29));
+
+            const finalRes = results[results.length - 1];
+            const totalInvested = params.initial + (params.savings * Math.min(params.savingsPeriod, params.years));
+
+            displays.resPrincipal.innerText = '₩ ' + fmt(totalInvested);
+            displays.resInterest.innerText = '₩ ' + fmt(finalRes.total - totalInvested);
+            displays.resMultiple.innerText = 'x ' + (finalRes.total / totalInvested).toFixed(1);
+
+            // Update Chart
+            chart.data.labels = results.map(d => d.year);
+            chart.data.datasets[0].data = results.map(d => d.total);
+            chart.data.datasets[1].data = results.map(d => d.accumPrincipal); // Or just linear principal growth
+            // Let's fix Principal line to be accurate
+            // Accumulated Principal = Initial + (Savings * years_passed)
+            let runningPrincipal = params.initial;
+            const principalData = results.map((d, i) => {
+                const savingAmount = (i < params.savingsPeriod) ? params.savings : 0;
+                runningPrincipal += savingAmount;
+                return runningPrincipal - savingAmount; // Current year start principal? 
+                // Actually "Accumulated Principal" usually means cash injected.
+                // Year 2026: 200M injected.
+                // Year 2027: 200 + 100 injected.
+            });
+            // Re-calc accurate principal line for chart
+            let p = params.initial;
+            chart.data.datasets[1].data = results.map((d, i) => {
+                const s = (i < params.savingsPeriod) ? params.savings : 0;
+                let val = p;
+                p += s;
+                return val + s; // Total injected by end of year
+            });
+
+            chart.update();
+
+            // Update Table
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = results.map(r => `
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="px-4 py-2 text-center text-slate-400 group-hover:text-white">
+                        ${r.year} <span class="text-xs text-slate-600 block group-hover:text-slate-400">(${r.age}세)</span>
+                    </td>
+                    <td class="px-4 py-2 text-slate-300">₩ ${fmtFull(r.invested)}</td>
+                    <td class="px-4 py-2 text-blue-300">+ ₩ ${fmtFull(r.profit)}</td>
+                    <td class="px-4 py-2 text-yellow-300 flex items-center justify-end gap-2">
+                        ${r.savings > 0 ? '<i class="fas fa-coins text-[10px] opacity-50"></i>' : ''} 
+                        ${fmtFull(r.savings)}
+                    </td>
+                    <td class="px-4 py-2 font-bold text-white bg-white/5">₩ ${fmtFull(r.total)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // CSV Export
+        function downloadCSV() {
+            const results = calculate();
+            let csv = "Year,Age,Initial,Profit,Savings,Total\n";
+            results.forEach(r => {
+                csv += `${r.year},${r.age},${Math.round(r.invested)},${Math.round(r.profit)},${Math.round(r.savings)},${Math.round(r.total)}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "financial_simulation.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Run
+        init();
+
+    </script>
+</body>
+
+</html>
