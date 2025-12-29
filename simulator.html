@@ -138,10 +138,10 @@
                                 저축액</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-2.5 text-slate-500">₩</span>
-                                <input type="text" id="input-savings" value="100000000" class="num-input pr-2">
+                                <input type="text" id="input-savings" value="0" class="num-input pr-2">
                             </div>
-                            <input type="range" id="range-savings" min="0" max="500000000" step="1000000"
-                                value="100000000" class="w-full mt-2">
+                            <input type="range" id="range-savings" min="0" max="500000000" step="1000000" value="0"
+                                class="w-full mt-2">
                         </div>
 
                         <!-- Savings Period -->
@@ -255,7 +255,7 @@
         let params = {
             initial: 0,
             rate: 25,
-            savings: 100000000,
+            savings: 0,
             savingsPeriod: 10,
             years: 30,
             years: 30,
@@ -434,7 +434,7 @@
         function resetDefaults() {
             params.initial = 0;
             params.rate = 25;
-            params.savings = 100000000;
+            params.savings = 0;
             params.savingsPeriod = 10;
 
             params.startYear = 2026;
