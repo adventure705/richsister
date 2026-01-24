@@ -237,7 +237,16 @@
         if (data.goalTitle) setGoalTitle(data.goalTitle);
         if (data.goalQuote) setGoalQuote(data.goalQuote);
         if (data.savingsUnit) setSavingsUnit(data.savingsUnit);
-        if (data.allRows) setAllRows(data.allRows);
+        if (data.allRows) {
+          let rows = [...data.allRows];
+          if (!rows.find(r => r.id === 'profit')) {
+            const trIdx = rows.findIndex(r => r.id === 'targetReturn');
+            if (trIdx !== -1) {
+              rows.splice(trIdx + 1, 0, { id: 'profit', label: '수익금', type: 'calculated', isSystem: true });
+            }
+          }
+          setAllRows(rows);
+        }
         if (data.items) setItems(data.items);
         if (data.yearDataStore) setYearDataStore(data.yearDataStore);
         if (data.darkMode !== undefined) setDarkMode(data.darkMode);
@@ -356,6 +365,7 @@
           { id: 'beginningAssets', label: '연초자산', type: 'number', isSystem: true },
           { id: 'investedAssets', label: '투자자산', type: 'number', isSystem: true },
           { id: 'targetReturn', label: '수익률 (%)', type: 'number', isSystem: true },
+          { id: 'profit', label: '수익금', type: 'calculated', isSystem: true },
           { id: 'savings', label: '저축액', type: 'number', isSystem: true },
           { id: 'yearEndAssets', label: '연말자산', type: 'calculated', isSystem: true },
           { id: 'lifePlan', label: '라이프 플랜', type: 'textarea' },
@@ -383,6 +393,7 @@
         { id: 'beginningAssets', label: '연초자산', type: 'number', isSystem: true },
         { id: 'investedAssets', label: '투자자산', type: 'number', isSystem: true },
         { id: 'targetReturn', label: '수익률 (%)', type: 'number', isSystem: true },
+        { id: 'profit', label: '수익금', type: 'calculated', isSystem: true },
         { id: 'savings', label: '저축액', type: 'number', isSystem: true },
         { id: 'yearEndAssets', label: '연말자산', type: 'calculated', isSystem: true },
         { id: 'lifePlan', label: '라이프 플랜', type: 'textarea' },
@@ -580,12 +591,16 @@
         }
       };
 
+      const calculateProfit = (item) => {
+        const beg = Number(item.beginningAssets) || 0;
+        const retPercent = Number(item.targetReturn) || 0;
+        return Math.round(beg * (retPercent / 100));
+      };
+
       const calculateYearEndAssets = (item) => {
         const beg = Number(item.beginningAssets) || 0;
-        const inv = Number(item.investedAssets) || 0;
         const sav = Number(item.savings) || 0;
-        const retPercent = Number(item.targetReturn) || 0;
-        const profit = inv * (retPercent / 100);
+        const profit = calculateProfit(item);
 
         let total = beg + profit + sav;
 
@@ -640,7 +655,8 @@
             // 만약 해당 연도에 수동으로 연초자산을 넣었다면 해당 값 사용
             if (store.beginningAssets !== undefined) currentBeg = store.beginningAssets;
 
-            const yearEnd = Math.round(currentBeg + (inv * (ret / 100)) + sav);
+            const profit = Math.round(currentBeg * (ret / 100));
+            const yearEnd = Math.round(currentBeg + profit + sav);
 
             // 중요: allRows를 순회하며 dynamicData에 따른 추가 연산 수행
             let finalYearEnd = yearEnd;
@@ -1082,6 +1098,8 @@
               chunk.forEach((item) => {
                 if (rowDef.id === 'yearEndAssets') {
                   rowValues.push(calculateYearEndAssets(item));
+                } else if (rowDef.id === 'profit') {
+                  rowValues.push(calculateProfit(item));
                 } else if (rowDef.id === 'targetReturn') {
                   rowValues.push(`${item.targetReturn}%`);
                 } else if (rowDef.isSystem) {
@@ -1259,6 +1277,12 @@
                             content = (
                               <div className="p-2 text-right font-black text-[15px]">
                                 {calculateYearEndAssets(item).toLocaleString()}
+                              </div>
+                            );
+                          } else if (row.id === 'profit') {
+                            content = (
+                              <div className="p-2 text-right font-black text-[15px] text-emerald-600 dark:text-emerald-400">
+                                {calculateProfit(item).toLocaleString()}
                               </div>
                             );
                           } else if (row.type === 'number' || row.id === 'beginningAssets' || row.id === 'investedAssets' || row.id === 'savings') {
