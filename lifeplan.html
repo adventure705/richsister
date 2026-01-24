@@ -172,22 +172,7 @@
               )}
               {children}
             </div>
-            {/* Footer / Version Info & Diagnostics */}
-            <div className="fixed bottom-2 right-4 flex gap-4 items-center z-50">
-              <button
-                onClick={() => {
-                  const dataCount = Object.keys(yearDataStore).length;
-                  const sample = dataCount > 0 ? JSON.stringify(yearDataStore[2026] || Object.values(yearDataStore)[0], null, 2) : "없음";
-                  alert(`[데이터 진단]\n- 로그인: ${currentUser ? "성공 (" + currentUser.email + ")" : "실패"}\n- 저장된 연도 데이터 수: ${dataCount}개\n- 현재 화면 데이터 수: ${items.length}개\n\n[샘플 데이터]\n${sample}`);
-                }}
-                className="text-[10px] text-slate-400 font-bold hover:text-brand-500 underline"
-              >
-                데이터 진단
-              </button>
-              <span className="text-[10px] text-slate-300 dark:text-slate-700 font-mono pointer-events-none opacity-50">
-                v1.3 (Secure Sync)
-              </span>
-            </div>
+
           </div>
         </div>
       );
