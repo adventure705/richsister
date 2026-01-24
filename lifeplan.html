@@ -270,23 +270,20 @@
         }
       };
 
-      // 인증 리스너 및 초기 데이터 로딩 보장
       useEffect(() => {
         let unsubscribeSnapshot = null;
+        let isInitialDocLoaded = false;
 
-        const initFirebase = async () => {
+        const initFirebase = () => {
           if (window.fb) {
-            // [추가] 리디렉션 결과 확인 (모바일 로그인 대응)
-            try {
-              const result = await window.fb.getRedirectResult(window.fb.auth);
-              if (result && result.user) {
-                console.log("Redirect login success:", result.user.email);
-              }
-            } catch (error) {
-              console.error("Redirect result error:", error);
-            }
+            // [최적화] 리디렉션 결과 확인을 비동기로 처리하여 onAuthStateChanged의 처리를 지연시키지 않음
+            window.fb.getRedirectResult(window.fb.auth)
+              .then(result => {
+                if (result && result.user) console.log("Redirect login success:", result.user.email);
+              })
+              .catch(error => console.error("Redirect error:", error));
 
-            window.fb.onAuthStateChanged(window.fb.auth, async (user) => {
+            window.fb.onAuthStateChanged(window.fb.auth, (user) => {
               setCurrentUser(user);
 
               if (unsubscribeSnapshot) {
@@ -295,41 +292,35 @@
               }
 
               if (user) {
-                // 1. [중요] 초기 데이터 "반드시" 가져오기 (이거 끝날 때까지 로딩 안 품)
-                try {
-                  const docRef = window.fb.doc(window.fb.db, "users", user.uid);
-
-                  // 메타데이터 포함해서 1회 조회
-                  const docSnap = await window.fb.getDoc(docRef);
-                  if (docSnap.exists()) {
-                    applyDataToState(docSnap.data().roadmap);
-                  } else {
-                    // 신규 유저(데이터 없음)인 경우 초기화
+                const docRef = window.fb.doc(window.fb.db, "users", user.uid);
+                // [최적화] getDoc + onSnapshot 이중 호출을 제거하고 onSnapshot 하나로 통합
+                // 네트워크 요청 횟수를 줄이고, 캐시 연동 시 로딩 시간을 대폭 단축
+                unsubscribeSnapshot = window.fb.onSnapshot(docRef, (doc) => {
+                  if (doc.exists()) {
+                    applyDataToState(doc.data().roadmap);
+                  } else if (!isInitialDocLoaded) {
+                    // 신규 유저(데이터 없음)인 경우만 초기화
                     resetState();
                   }
-                } catch (e) {
-                  console.error("Initial load error", e);
-                }
 
-                // 2. 데이터 세팅이 끝났으니 이제야 로딩 해제 (화면 오픈!)
-                setIsAuthChecking(false);
-
-                // 3. 그 뒤에 실시간 리스너 연결 (미래의 변경사항 수신용)
-                try {
-                  const docRef = window.fb.doc(window.fb.db, "users", user.uid);
-                  unsubscribeSnapshot = window.fb.onSnapshot(docRef, { includeMetadataChanges: true }, (doc) => {
-                    if (doc.exists()) {
-                      applyDataToState(doc.data().roadmap);
-                    }
-                  });
-                } catch (e) { console.error(e); }
-
+                  if (!isInitialDocLoaded) {
+                    setIsAuthChecking(false);
+                    isInitialDocLoaded = true;
+                  }
+                }, (error) => {
+                  console.error("Firestore sync error:", error);
+                  if (!isInitialDocLoaded) {
+                    setIsAuthChecking(false);
+                    isInitialDocLoaded = true;
+                  }
+                });
               } else {
                 setIsAuthChecking(false);
               }
             });
           } else {
-            setTimeout(initFirebase, 200);
+            // Firebase 로드 대기 주기를 단축 (200ms -> 50ms)
+            setTimeout(initFirebase, 50);
           }
         };
         initFirebase();
@@ -1205,9 +1196,7 @@
                 <span className="text-3xl md:text-4xl drop-shadow-md">👑</span>
                 {startYear + startIndex}년 ~ {startYear + startIndex + 9}년
               </h2>
-              <div className="md:hidden text-[10px] bg-brand-500/10 text-brand-600 px-3 py-1 rounded-full font-bold animate-pulse">
-                옆으로 슬라이드 →
-              </div>
+
             </div>
             <div id={`table-container-${startIndex}`} className="overflow-x-auto scrollbar-hide pb-2">
               <table className={`w-full border-collapse border border-slate-200 dark:border-brand-900/30 text-[11px] table-fixed min-w-[1400px]`}>
