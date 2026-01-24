@@ -238,7 +238,7 @@
         if (data.goalQuote) setGoalQuote(data.goalQuote);
         if (data.savingsUnit) setSavingsUnit(data.savingsUnit);
         if (data.allRows) {
-          let rows = [...data.allRows];
+          let rows = data.allRows.filter(r => r.id !== 'investedAssets');
           if (!rows.find(r => r.id === 'profit')) {
             const trIdx = rows.findIndex(r => r.id === 'targetReturn');
             if (trIdx !== -1) {
@@ -363,7 +363,6 @@
         setSavingsUnit('만원');
         setAllRows([
           { id: 'beginningAssets', label: '연초자산', type: 'number', isSystem: true },
-          { id: 'investedAssets', label: '투자자산', type: 'number', isSystem: true },
           { id: 'targetReturn', label: '수익률 (%)', type: 'number', isSystem: true },
           { id: 'profit', label: '수익금', type: 'calculated', isSystem: true },
           { id: 'savings', label: '저축액', type: 'number', isSystem: true },
@@ -391,7 +390,6 @@
 
       const [allRows, setAllRows] = useState([
         { id: 'beginningAssets', label: '연초자산', type: 'number', isSystem: true },
-        { id: 'investedAssets', label: '투자자산', type: 'number', isSystem: true },
         { id: 'targetReturn', label: '수익률 (%)', type: 'number', isSystem: true },
         { id: 'profit', label: '수익금', type: 'calculated', isSystem: true },
         { id: 'savings', label: '저축액', type: 'number', isSystem: true },
@@ -622,7 +620,6 @@
           const store = yearDataStore?.[year] || {};
           return {
             beginningAssets: store.beginningAssets !== undefined ? store.beginningAssets : 0,
-            investedAssets: store.investedAssets !== undefined ? store.investedAssets : 0,
             savings: store.savings !== undefined ? store.savings : 820,
             targetReturn: store.targetReturn !== undefined ? store.targetReturn : 15,
             dynamicData: store.dynamicData || {}
@@ -648,7 +645,6 @@
 
           for (let y = baseYear; y <= endYear; y++) {
             const store = yearDataStore[y] || {};
-            const inv = store.investedAssets !== undefined ? store.investedAssets : 0;
             const sav = store.savings !== undefined ? store.savings : defaultSavings;
             const ret = store.targetReturn !== undefined ? store.targetReturn : defaultReturn;
 
@@ -672,7 +668,6 @@
 
             fullTimeline[y] = {
               beginningAssets: currentBeg,
-              investedAssets: inv,
               savings: sav,
               targetReturn: ret,
               yearEndAssets: finalYearEnd,
@@ -739,7 +734,7 @@
       const updateItem = (index, field, value) => {
         takeSnapshot();
         const year = startYear + index;
-        const val = ['beginningAssets', 'investedAssets', 'savings', 'targetReturn'].includes(field) ? (Number(value) || 0) : value;
+        const val = ['beginningAssets', 'savings', 'targetReturn'].includes(field) ? (Number(value) || 0) : value;
 
         // 마스터 저장소 업데이트
         setYearDataStore(prev => ({
@@ -1285,7 +1280,7 @@
                                 {calculateProfit(item).toLocaleString()}
                               </div>
                             );
-                          } else if (row.type === 'number' || row.id === 'beginningAssets' || row.id === 'investedAssets' || row.id === 'savings') {
+                          } else if (row.type === 'number' || row.id === 'beginningAssets' || row.id === 'savings') {
                             const val = row.isSystem ? item[row.id] : item.dynamicData?.[row.id];
                             content = (
                               <input
@@ -1298,11 +1293,10 @@
                                     : updateDynamicData(globalIdx, row.id, cleaned);
                                 }}
                                 spellCheck="false"
-                                className={`w-full text-right p-1 bg-transparent pr-3 outline-none font-black text-[15px] ${row.id === 'investedAssets' ? 'text-brand-600 dark:text-brand-400' :
-                                  row.id === 'savings' ? 'text-orange-500 dark:text-orange-400' :
-                                    row.operator === 'add' ? 'text-emerald-600 dark:text-emerald-400' :
-                                      row.operator === 'subtract' ? 'text-red-500 dark:text-red-400' :
-                                        'text-slate-700 dark:text-white'
+                                className={`w-full text-right p-1 bg-transparent pr-3 outline-none font-black text-[15px] ${row.id === 'savings' ? 'text-orange-500 dark:text-orange-400' :
+                                  row.operator === 'add' ? 'text-emerald-600 dark:text-emerald-400' :
+                                    row.operator === 'subtract' ? 'text-red-500 dark:text-red-400' :
+                                      'text-slate-700 dark:text-white'
                                   }`}
                               />
                             );
