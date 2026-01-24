@@ -125,9 +125,8 @@
   <script type="text/babel">
     const { useState, useRef, useEffect } = React;
 
-    // 아이콘 컴포넌트
+    // 아이콘 컴포넌트 (안전 모드)
     const Icon = ({ name, size = 20, className = "" }) => {
-      const ref = useRef(null);
       const emojis = {
         'save': '💾', 'table-2': '📊', 'image-plus': '🖼️',
         'cloud-download': '☁️', 'log-out': '🚪', 'log-in': '🔑',
@@ -135,29 +134,8 @@
         'book-open': '📖', 'calendar': '📅', 'user': '👤',
         'check-circle': '✅', 'alert-triangle': '⚠️', 'info': 'ℹ️', 'database-zap': '⚡', 'cpu': '🤖'
       };
-
-      useEffect(() => {
-        if (!ref.current || !window.lucide) return;
-
-        const pascalName = name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
-        const iconNode = window.lucide.icons[pascalName] || window.lucide.icons[name];
-
-        if (iconNode) {
-          ref.current.innerHTML = iconNode.toSvg({
-            width: size,
-            height: size,
-            class: className,
-            "stroke-width": 2
-          });
-        }
-      }, [name, size, className]);
-
-      return (
-        <span ref={ref} className={`inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
-          {/* SVG 로드 전에는 이모지로 대체 */}
-          {!window.lucide && (emojis[name] || '')}
-        </span>
-      );
+      // 우선 화면 복구를 위해 SVG 렌더링을 중단하고 이모지만 보여줍니다.
+      return <span style={{ fontSize: size, lineHeight: 1 }} className={className}>{emojis[name] || ''}</span>;
     };
 
     // 모달 컴포넌트
