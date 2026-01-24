@@ -1159,6 +1159,13 @@
         }
       };
 
+      const scrollTable = (idx, amount) => {
+        const container = document.getElementById(`table-container-${idx}`);
+        if (container) {
+          container.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+      };
+
       const renderTable = (startIndex) => {
         const chunk = items.slice(startIndex, startIndex + 10);
         const borderColor = darkMode ? 'border-slate-700' : 'border-slate-300';
@@ -1176,7 +1183,7 @@
                 옆으로 슬라이드 →
               </div>
             </div>
-            <div className="overflow-x-auto scrollbar-hide pb-2">
+            <div id={`table-container-${startIndex}`} className="overflow-x-auto scrollbar-hide pb-2">
               <table className={`w-full border-collapse border border-slate-200 dark:border-brand-900/30 text-[11px] table-fixed min-w-[1400px]`}>
                 <thead>
                   <tr className={`${headerBg} text-white shadow-lg relative`}>
@@ -1334,6 +1341,30 @@
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* 시점 이동 슬라이드 버튼 (모바일용) */}
+            <div className="flex items-center justify-center gap-8 mt-6 md:hidden">
+              <button
+                onClick={() => scrollTable(startIndex, -300)}
+                className="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-brand-600 active:scale-95 transition-transform"
+              >
+                <Icon name="chevron-left" size={28} />
+              </button>
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-black text-brand-500 uppercase tracking-widest mb-1">Slide</span>
+                <div className="flex gap-1">
+                  <div className={`w-1.5 h-1.5 rounded-full ${startIndex === 0 ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
+                  <div className={`w-1.5 h-1.5 rounded-full ${startIndex === 10 ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
+                  <div className={`w-1.5 h-1.5 rounded-full ${startIndex === 20 ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
+                </div>
+              </div>
+              <button
+                onClick={() => scrollTable(startIndex, 300)}
+                className="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-brand-600 active:scale-95 transition-transform"
+              >
+                <Icon name="chevron-right" size={28} />
+              </button>
             </div>
           </div>
         );
