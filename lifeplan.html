@@ -1620,9 +1620,8 @@
               </div>
 
               <div className="flex flex-col gap-3 w-full max-w-5xl mx-auto mt-8">
-                {/* Row 1: Main Actions + Auth (Gradient descending from #af1d42) */}
+                {/* Row 1: Data Management (Save, Load, Logout) - #af1d42 theme */}
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  {/* 1. Save (#af1d42) */}
                   <button
                     onClick={createBackup}
                     className="bg-[#af1d42] hover:bg-[#911836] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
@@ -1630,37 +1629,19 @@
                     <Icon name="save" size={18} />
                     <span>저장하기</span>
                   </button>
-                  {/* 2. Excel (#ba2d4e) */}
-                  <button
-                    onClick={downloadExcel}
-                    className="bg-[#ba2d4e] hover:bg-[#9c2540] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                  >
-                    <Icon name="table-2" size={18} />
-                    <span>Excel 다운로드</span>
-                  </button>
-                  {/* 3. Image (#c53d5a) */}
-                  <button
-                    onClick={downloadImage}
-                    className="bg-[#c53d5a] hover:bg-[#a7334b] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                  >
-                    <Icon name="image-plus" size={18} />
-                    <span>이미지 다운로드</span>
-                  </button>
-                  {/* 4. Load (#cf4d66) */}
                   {currentUser && (
                     <button
                       onClick={() => loadFromFirestore(currentUser, true)}
-                      className="bg-[#cf4d66] hover:bg-[#b04055] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                      className="bg-[#ba2d4e] hover:bg-[#9c2540] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                     >
                       <Icon name="cloud-download" size={18} />
                       <span>불러오기</span>
                     </button>
                   )}
-                  {/* 5. Logout/Login (#da5d72) - Rightmost */}
                   {currentUser ? (
                     <button
                       onClick={handleLogout}
-                      className="bg-[#da5d72] hover:bg-[#bc4e61] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                      className="bg-[#c53d5a] hover:bg-[#a7334b] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                     >
                       <Icon name="log-out" size={18} />
                       <span>로그아웃</span>
@@ -1668,7 +1649,7 @@
                   ) : (
                     <button
                       onClick={handleLogin}
-                      className="bg-[#da5d72] hover:bg-[#bc4e61] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px] animate-pulse"
+                      className="bg-[#c53d5a] hover:bg-[#a7334b] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px] animate-pulse"
                     >
                       <Icon name="log-in" size={18} />
                       <span>로그인</span>
@@ -1676,9 +1657,26 @@
                   )}
                 </div>
 
-                {/* Row 2: Edit & View Actions (Lighter shades) */}
+                {/* Row 2: Export (Excel, Image) - Lighter Red */}
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  {/* 6. Add Row (#e46d7e) */}
+                  <button
+                    onClick={downloadExcel}
+                    className="bg-[#cf4d66] hover:bg-[#b04055] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="table-2" size={18} />
+                    <span>Excel 다운로드</span>
+                  </button>
+                  <button
+                    onClick={downloadImage}
+                    className="bg-[#da5d72] hover:bg-[#bc4e61] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="image-plus" size={18} />
+                    <span>이미지 다운로드</span>
+                  </button>
+                </div>
+
+                {/* Row 3: Edit & View (Add, History, Mode) - Lightest Red/Pink */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
                     className="bg-[#e46d7e] hover:bg-[#c65d6c] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
@@ -1686,7 +1684,6 @@
                     <Icon name="layers" size={18} />
                     <span>행 추가</span>
                   </button>
-                  {/* 7. History (#ef7d8a) */}
                   <button
                     onClick={() => setModalState({ type: 'history' })}
                     className="bg-[#ef7d8a] hover:bg-[#d16d78] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
@@ -1694,7 +1691,6 @@
                     <Icon name="history" size={18} />
                     <span>백업 기록 관리</span>
                   </button>
-                  {/* 8. Mode (#f98d96) */}
                   <button
                     onClick={() => setDarkMode(!darkMode)}
                     className="bg-[#f98d96] hover:bg-[#df7d85] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl flex-1 min-w-[110px]"
