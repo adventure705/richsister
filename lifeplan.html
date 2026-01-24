@@ -384,8 +384,22 @@
       ]);
 
       // 연도별 데이터 마스터 저장소 (연도 이동 시 복원용)
-      // 연도별 데이터 마스터 저장소 (연도 이동 시 복원용)
       const [yearDataStore, setYearDataStore] = useState({});
+
+      // [중요] 비동기 함수(저장/자동저장)에서 최신 상태를 참조하기 위한 Ref
+      const latestStateRef = useRef({
+        pageTitle, pageSubtitle, startAge, startYear,
+        defaultReturn, defaultSavings, goalTitle, goalQuote,
+        savingsUnit, allRows, yearDataStore, items, darkMode
+      });
+
+      useEffect(() => {
+        latestStateRef.current = {
+          pageTitle, pageSubtitle, startAge, startYear,
+          defaultReturn, defaultSavings, goalTitle, goalQuote,
+          savingsUnit, allRows, yearDataStore, items, darkMode
+        };
+      }, [pageTitle, pageSubtitle, startAge, startYear, defaultReturn, defaultSavings, goalTitle, goalQuote, savingsUnit, allRows, yearDataStore, items, darkMode]);
 
       // 실행 취소 / 다시 실행 스택
       const [undoStack, setUndoStack] = useState([]);
@@ -449,7 +463,8 @@
       const [history, setHistory] = useState([]);
 
       const createBackup = async (isAuto = false) => {
-        // 스냅샷 생성
+        // [중요] 최신 상태(Ref)를 사용하여 스냅샷 생성
+        const currentData = latestStateRef.current;
         const snapshot = {
           id: Date.now(),
           timestamp: new Date().toLocaleString('ko-KR', {
@@ -457,11 +472,7 @@
             hour: '2-digit', minute: '2-digit', second: '2-digit'
           }),
           isAuto,
-          data: {
-            pageTitle, pageSubtitle, startAge, startYear,
-            defaultReturn, defaultSavings, goalTitle, goalQuote,
-            savingsUnit, allRows, items, darkMode
-          }
+          data: currentData
         };
 
         // 로컬 히스토리(메모리) 업데이트
