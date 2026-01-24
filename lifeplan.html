@@ -326,10 +326,8 @@
       ]);
 
       // 연도별 데이터 마스터 저장소 (연도 이동 시 복원용)
-      const [yearDataStore, setYearDataStore] = useState(() => {
-        const saved = localStorage.getItem('roadmap_year_data');
-        return saved ? JSON.parse(saved) : {};
-      });
+      // 연도별 데이터 마스터 저장소 (연도 이동 시 복원용)
+      const [yearDataStore, setYearDataStore] = useState({});
 
       // 실행 취소 / 다시 실행 스택
       const [undoStack, setUndoStack] = useState([]);
@@ -387,21 +385,10 @@
         applySnapshot(next);
       };
 
-      useEffect(() => {
-        try {
-          localStorage.setItem('roadmap_year_data', JSON.stringify(yearDataStore));
-        } catch (e) {
-          // 이미지 데이터가 커서 localStorage(5MB) 용량을 초과해도 
-          // 실제 '이미지 파일 저장' 기능은 html2canvas를 사용하므로 정상 작동합니다.
-          // 사용자에게 매번 팝업을 띄우지 않도록 로그로만 처리합니다.
-          console.warn("로컬 저장소 저장 실패 (용량 부족 등):", e.message);
-        }
-      }, [yearDataStore]);
+      // 로컬 스토리지 저장 로직 제거 (클라우드 전용)
+      /* useEffect(() => { ... }, [yearDataStore]); 삭제됨 */
 
-      const [history, setHistory] = useState(() => {
-        const saved = localStorage.getItem('roadmap_history');
-        return saved ? JSON.parse(saved) : [];
-      });
+      const [history, setHistory] = useState([]);
 
       const createBackup = async (isAuto = false) => {
         // 스냅샷 생성
@@ -419,10 +406,9 @@
           }
         };
 
-        // 로컬 히스토리 저장
+        // 로컬 히스토리(메모리) 업데이트
         setHistory(prev => {
           const newHistory = [snapshot, ...prev].slice(0, 100);
-          localStorage.setItem('roadmap_history', JSON.stringify(newHistory));
           return newHistory;
         });
 
@@ -436,18 +422,18 @@
             await saveToFirestore(currentUser, snapshot.data);
 
             if (!isAuto) {
-              setModalState({ type: 'status', data: { title: "저장 성공", msg: "데이터가 클라우드와 로컬에 모두 안전하게 저장되었습니다.", icon: "check-circle" } });
+              setModalState({ type: 'status', data: { title: "저장 성공", msg: "데이터가 클라우드에 안전하게 저장되었습니다.", icon: "check-circle" } });
             }
           } catch (e) {
             console.error("Cloud save failed:", e);
             if (!isAuto) {
-              setModalState({ type: 'status', data: { title: "⚠️ 클라우드 저장 실패", msg: `로컬에는 저장되었으나 클라우드 저장에 실패했습니다.\n\n오류 내용: ${e.message}\n(Firebase 보안 규칙 혹은 용량 초과를 확인해주세요)`, icon: "alert-triangle" } });
+              setModalState({ type: 'status', data: { title: "⚠️ 클라우드 저장 실패", msg: `오류가 발생했습니다: ${e.message}\n(Firebase 보안 규칙 혹은 용량 초과를 확인해주세요)`, icon: "alert-triangle" } });
             }
           }
         } else {
-          // 비로그인 상태면 로컬 저장 완료 메시지만
+          // 비로그인 상태면 경고
           if (!isAuto) {
-            setModalState({ type: 'status', data: { title: "로컬 저장 완료", msg: "데이터가 이 컴퓨터에만 저장되었습니다.\n로그인하시면 다른 기기에서도 볼 수 있습니다.", icon: "check-circle" } });
+            setModalState({ type: 'status', data: { title: "임시 저장 완료", msg: "데이터가 임시로 메모리에 저장되었습니다.\n⚠️ 주의: 새로고침하거나 창을 닫으면 데이터가 사라집니다.\n로그인하여 클라우드에 안전하게 저장하세요.", icon: "alert-circle" } });
           }
         }
       };
