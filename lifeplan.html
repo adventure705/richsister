@@ -127,27 +127,27 @@
 
     // 아이콘 컴포넌트
     const Icon = ({ name, size = 20, className = "" }) => {
-      const iconRef = useRef(null);
-      useEffect(() => {
-        if (iconRef.current && window.lucide) {
-          const iconName = name.replace(/-./g, x => x[1].toUpperCase());
-          const actualIcon = lucide.icons[name] || lucide.icons[iconName] || lucide.icons[name.charAt(0).toUpperCase() + name.slice(1)];
+      const [svgHtml, setSvgHtml] = useState(null);
 
-          if (actualIcon) {
-            lucide.createIcons({
-              icons: { [name]: actualIcon },
-              nameAttr: 'data-lucide',
-              attrs: {
-                strokeWidth: 2,
-                width: size,
-                height: size,
-                class: className
-              }
-            });
+      useEffect(() => {
+        if (window.lucide && window.lucide.icons) {
+          const camelName = name.replace(/-./g, x => x[1].toUpperCase());
+          const PascalName = camelName.charAt(0).toUpperCase() + camelName.slice(1);
+          const iconNode = window.lucide.icons[name] || window.lucide.icons[camelName] || window.lucide.icons[PascalName];
+
+          if (iconNode) {
+            setSvgHtml(iconNode.toSvg({
+              width: size,
+              height: size,
+              class: className,
+              "stroke-width": 2
+            }));
           }
         }
       }, [name, size, className]);
-      return <i ref={iconRef} data-lucide={name} className={className}></i>;
+
+      if (!svgHtml) return <span style={{ width: size, height: size }} className="inline-block bg-white/20 rounded-full"></span>;
+      return <span dangerouslySetInnerHTML={{ __html: svgHtml }} className="inline-flex items-center justify-center text-current" />;
     };
 
     // 모달 컴포넌트
@@ -513,7 +513,7 @@
           } catch (e) {
             console.error("Cloud save failed:", e);
             if (!isAuto) {
-              setModalState({ type: 'status', data: { title: "⚠️ 클라우드 저장 실패", msg: `오류가 발생했습니다: ${e.message}\n(Firebase 보안 규칙 혹은 용량 초과를 확인해주세요)`, icon: "alert-triangle" } });
+              setModalState({ type: 'status', data: { title: "⚠️ 클라우드 저장 실패", msg: `오류가 발생했습니다: ${e.message}\n(Firebase 보안 규칙 혹은 용량 초과를 확인하세요)`, icon: "alert-triangle" } });
             }
           }
         } else {
@@ -1399,7 +1399,7 @@
                 <textarea
                   className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-bold outline-none focus:ring-2 focus:ring-brand-500 min-h-[100px] text-slate-700 dark:text-slate-200"
                   value={pageSubtitle}
-                  onChange={e => setPageSubtitle(e.target.value)}
+                  onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
                 />
               </div>
               <button onClick={closeModal} className="w-full py-4 bg-brand text-white rounded-2xl font-black text-lg shadow-xl shadow-brand/20 hover:scale-[1.02] transition-transform">저장하기</button>
@@ -1615,52 +1615,8 @@
               <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block pointer-events-none">
                 <Icon name="book-open" size={120} />
               </div>
-              {/* Auth Buttons: Top Right on Desktop */}
-              <div className="absolute top-6 right-6 z-20 hidden md:block">
-                {currentUser ? (
-                  <div className="flex bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 shadow-lg gap-1">
-                    <button
-                      onClick={() => loadFromFirestore(currentUser, true)}
-                      className="bg-transparent hover:bg-white/10 text-slate-700 dark:text-white px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-xs"
-                      title="서버에서 데이터 강제 불러오기"
-                    >
-                      <Icon name="cloud-download" size={16} />
-                      <span>불러오기</span>
-                    </button>
-                    <div className="w-[1px] bg-white/20 my-1"></div>
-                    <button
-                      onClick={handleLogout}
-                      className="bg-gradient-to-r from-[#af1d42] to-[#8a1734] hover:from-[#c72e59] hover:to-[#a01a3d] text-white px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition-all text-xs"
-                    >
-                      <Icon name="log-out" size={16} />
-                      <span>로그아웃</span>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleLogin}
-                    className="bg-gradient-to-r from-[#af1d42] to-[#8a1734] hover:from-[#c72e59] hover:to-[#a01a3d] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-rose-900/20 transition-all active:scale-95 text-sm animate-pulse"
-                  >
-                    <Icon name="log-in" size={18} />
-                    <span>구글 연동 로그인</span>
-                  </button>
-                )}
-              </div>
-
               {/* Main Title Area */}
               <div className="flex flex-col items-center justify-center w-full text-center mt-6 md:mt-0 relative z-10">
-                {/* Mobile Auth (Visible only on small screens) */}
-                <div className="md:hidden w-full flex justify-end mb-4 gap-2">
-                  {currentUser ? (
-                    <>
-                      <button onClick={() => loadFromFirestore(currentUser, true)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">불러오기</button>
-                      <button onClick={handleLogout} className="bg-[#af1d42] text-white px-3 py-1.5 rounded-lg text-xs font-bold">로그아웃</button>
-                    </>
-                  ) : (
-                    <button onClick={handleLogin} className="bg-[#af1d42] text-white px-3 py-1.5 rounded-lg text-xs font-bold">로그인</button>
-                  )}
-                </div>
-
                 <input
                   value={pageTitle}
                   onChange={e => setPageTitle(e.target.value)}
@@ -1674,52 +1630,88 @@
                   onFocus={handleAutoHeight}
                 />
               </div>
-              <div className="flex flex-col gap-3 w-full max-w-4xl mx-auto mt-6">
-                {/* Row 1: File Actions */}
+
+              <div className="flex flex-col gap-3 w-full max-w-5xl mx-auto mt-8">
+                {/* Row 1: Main Actions + Auth (Gradient descending from #af1d42) */}
                 <div className="flex flex-wrap items-center justify-center gap-3">
+                  {/* 1. Save (#af1d42) */}
                   <button
                     onClick={createBackup}
-                    className="bg-gradient-to-r from-[#af1d42] to-[#8a1734] hover:from-[#c72e59] hover:to-[#a01a3d] text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-rose-900/20 transition-all active:scale-95 flex-1 min-w-[120px]"
+                    className="bg-[#af1d42] hover:bg-[#911836] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                   >
-                    <Icon name="save" size={20} />
+                    <Icon name="save" size={18} />
                     <span>저장하기</span>
                   </button>
+                  {/* 2. Excel (#ba2d4e) */}
                   <button
                     onClick={downloadExcel}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex-1 min-w-[120px]"
+                    className="bg-[#ba2d4e] hover:bg-[#9c2540] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                   >
-                    <Icon name="table-2" size={20} />
+                    <Icon name="table-2" size={18} />
                     <span>Excel 다운로드</span>
                   </button>
+                  {/* 3. Image (#c53d5a) */}
                   <button
                     onClick={downloadImage}
-                    className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 transition-all active:scale-95 flex-1 min-w-[120px]"
+                    className="bg-[#c53d5a] hover:bg-[#a7334b] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                   >
-                    <Icon name="image-plus" size={20} />
+                    <Icon name="image-plus" size={18} />
                     <span>이미지 다운로드</span>
                   </button>
+                  {/* 4. Load (#cf4d66) */}
+                  {currentUser && (
+                    <button
+                      onClick={() => loadFromFirestore(currentUser, true)}
+                      className="bg-[#cf4d66] hover:bg-[#b04055] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                    >
+                      <Icon name="cloud-download" size={18} />
+                      <span>불러오기</span>
+                    </button>
+                  )}
+                  {/* 5. Logout/Login (#da5d72) - Rightmost */}
+                  {currentUser ? (
+                    <button
+                      onClick={handleLogout}
+                      className="bg-[#da5d72] hover:bg-[#bc4e61] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                    >
+                      <Icon name="log-out" size={18} />
+                      <span>로그아웃</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleLogin}
+                      className="bg-[#da5d72] hover:bg-[#bc4e61] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px] animate-pulse"
+                    >
+                      <Icon name="log-in" size={18} />
+                      <span>로그인</span>
+                    </button>
+                  )}
                 </div>
-                {/* Row 2: Edit & View Actions */}
+
+                {/* Row 2: Edit & View Actions (Lighter shades) */}
                 <div className="flex flex-wrap items-center justify-center gap-3">
+                  {/* 6. Add Row (#e46d7e) */}
                   <button
                     onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
-                    className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-700/20 transition-all active:scale-95 flex-1 min-w-[100px]"
+                    className="bg-[#e46d7e] hover:bg-[#c65d6c] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                   >
                     <Icon name="layers" size={18} />
                     <span>행 추가</span>
                   </button>
+                  {/* 7. History (#ef7d8a) */}
                   <button
                     onClick={() => setModalState({ type: 'history' })}
-                    className="bg-slate-500 hover:bg-slate-600 text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-500/20 transition-all active:scale-95 flex-1 min-w-[100px]"
+                    className="bg-[#ef7d8a] hover:bg-[#d16d78] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                   >
                     <Icon name="history" size={18} />
                     <span>백업 기록 관리</span>
                   </button>
+                  {/* 8. Mode (#f98d96) */}
                   <button
                     onClick={() => setDarkMode(!darkMode)}
-                    className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl border border-slate-200 dark:border-slate-700 flex-1 min-w-[100px]"
+                    className="bg-[#f98d96] hover:bg-[#df7d85] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl flex-1 min-w-[110px]"
                   >
-                    {darkMode ? <Icon name="sun" size={18} className="text-yellow-400" /> : <Icon name="moon" size={18} className="text-brand-600" />}
+                    {darkMode ? <Icon name="sun" size={18} className="text-yellow-200" /> : <Icon name="moon" size={18} />}
                     <span>{darkMode ? '라이트 모드' : '다크 모드'}</span>
                   </button>
                 </div>
