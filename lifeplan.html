@@ -128,26 +128,36 @@
     // 아이콘 컴포넌트
     const Icon = ({ name, size = 20, className = "" }) => {
       const ref = useRef(null);
+      const emojis = {
+        'save': '💾', 'table-2': '📊', 'image-plus': '🖼️',
+        'cloud-download': '☁️', 'log-out': '🚪', 'log-in': '🔑',
+        'layers': '➕', 'history': '🕒', 'sun': '☀️', 'moon': '🌙',
+        'book-open': '📖', 'calendar': '📅', 'user': '👤',
+        'check-circle': '✅', 'alert-triangle': '⚠️', 'info': 'ℹ️', 'database-zap': '⚡', 'cpu': '🤖'
+      };
 
       useEffect(() => {
-        if (!window.lucide || !ref.current) return;
+        if (!ref.current || !window.lucide) return;
 
-        // kebab-case to PascalCase 변환 (예: cloud-download -> CloudDownload)
-        const pascalName = name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+        const pascalName = name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
         const iconNode = window.lucide.icons[pascalName] || window.lucide.icons[name];
 
         if (iconNode) {
-          const svgString = iconNode.toSvg({
+          ref.current.innerHTML = iconNode.toSvg({
             width: size,
             height: size,
             class: className,
             "stroke-width": 2
           });
-          ref.current.innerHTML = svgString;
         }
       }, [name, size, className]);
 
-      return <span ref={ref} className={`inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }}></span>;
+      return (
+        <span ref={ref} className={`inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
+          {/* SVG 로드 전에는 이모지로 대체 */}
+          {!window.lucide && (emojis[name] || '')}
+        </span>
+      );
     };
 
     // 모달 컴포넌트
