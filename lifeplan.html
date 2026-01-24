@@ -1221,7 +1221,7 @@
                             content = (
                               <input
                                 type="text"
-                                value={row.isSystem ? Number(val || 0).toLocaleString() : (item.dynamicData?.[row.id] || "")}
+                                value={row.isSystem ? (Number(val) === 0 ? "" : Number(val).toLocaleString()) : (item.dynamicData?.[row.id] || "")}
                                 onChange={(e) => {
                                   const cleaned = e.target.value.replace(/,/g, '').replace(/[^0-9.\-]/g, '');
                                   row.isSystem
