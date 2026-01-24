@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인생 로드맵 30년 시나리오</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fef2f4',
+              100: '#fde6e9',
+              200: '#fbd0d9',
+              300: '#f7a9ba',
+              400: '#f17392',
+              500: '#e5456f',
+              600: '#af1d42', // Base Color
+              700: '#af1d42',
+              800: '#911a39',
+              900: '#7a1a33',
+              950: '#440a18',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- React & Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Excel (ExcelJS) -->
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css');
+
+    body {
+      font-family: 'NanumSquare', sans-serif;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .modal-overlay {
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .animate-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCK_FPWI4TIDOJQ1TQ1lYN-QwO-D1Gw2fg",
+      authDomain: "richsister-5cf8c.firebaseapp.com",
+      projectId: "richsister-5cf8c",
+      storageBucket: "richsister-5cf8c.firebasestorage.app",
+      messagingSenderId: "773702207866",
+      appId: "1:773702207866:web:87e277b70f7bf188892ec3",
+      measurementId: "G-B51PDEQYX9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // 리액트 컴포넌트에서 접근할 수 있도록 전역에 노출
+    window.fb = {
+      auth,
+      db,
+      provider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged,
+      doc,
+      getDoc,
+      setDoc
+    };
+
+    // 로드 완료 이벤트 발생 (옵션)
+    window.dispatchEvent(new Event('firebase-loaded'));
+  </script>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    // 아이콘 컴포넌트
+    const Icon = ({ name, size = 20, className = "" }) => {
+      const iconRef = useRef(null);
+      useEffect(() => {
+        if (iconRef.current && window.lucide) {
+          const iconName = name.replace(/-./g, x => x[1].toUpperCase());
+          const actualIcon = lucide.icons[name] || lucide.icons[iconName] || lucide.icons[name.charAt(0).toUpperCase() + name.slice(1)];
+
+          if (actualIcon) {
+            lucide.createIcons({
+              icons: { [name]: actualIcon },
+              nameAttr: 'data-lucide',
+              attrs: {
+                strokeWidth: 2,
+                width: size,
+                height: size,
+                class: className
+              }
+            });
+          }
+        }
+      }, [name, size, className]);
+      return <i ref={iconRef} data-lucide={name} className={className}></i>;
+    };
+
+    // 모달 컴포넌트
+    const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md" }) => {
+      useEffect(() => {
+        const handleEsc = (e) => {
+          if (e.key === 'Escape') onClose();
+        };
+        if (isOpen) window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+      }, [isOpen, onClose]);
+
+      if (!isOpen) return null;
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay overflow-y-auto" onClick={onClose}>
+          <div
+            className={`bg-white dark:bg-slate-900 rounded-[2rem] w-full ${maxWidth} shadow-2xl animate-in overflow-hidden border border-slate-200 dark:border-slate-800`}
+            onClick={e => e.stopPropagation()}
+          >
+            {title && (
+              <div className="px-8 py-6 border-b border-slate-100 dark:border-brand-900/30 flex justify-between items-center bg-brand-50/30 dark:bg-brand-950/40">
+                <h3 className="text-xl font-black text-brand-700 dark:text-brand-300">{title}</h3>
+                <button onClick={onClose} className="text-brand-400 hover:text-brand-600 dark:hover:text-brand-200 transition-colors">
+                  <Icon name="x" size={24} />
+                </button>
+              </div>
+            )}
+            <div className={title ? "p-8" : "p-2"}>
+              {!title && (
+                <button onClick={onClose} className="absolute top-6 right-6 z-10 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors">
+                  <Icon name="x" size={24} />
+                </button>
+              )}
+              {children}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      const roadmapRef = useRef(null);
+      const fileInputRef = useRef(null);
+
+      const [activeCell, setActiveCell] = useState(null);
+      const [darkMode, setDarkMode] = useState(false);
+
+      // Firebase User State
+      const [currentUser, setCurrentUser] = useState(null);
+
+      // Firestore 저장/로드 헬퍼 함수
+      const saveToFirestore = async (user, data) => {
+        if (!user || !window.fb) return;
+        try {
+          // 데이터 사이즈 체크 및 최적화가 필요할 수 있음 (이미지는 제외하거나 Storage로 분리 권장하지만, 일단 포함)
+          const docRef = window.fb.doc(window.fb.db, "users", user.uid);
+          // yearDataStore 등 큰 데이터는 별도 서브컬렉션으로 빼는게 좋으나, 단순화를 위해 하나의 문서에 저장
+          await window.fb.setDoc(docRef, {
+            roadmap: data,
+            updatedAt: new Date().toISOString(),
+            uid: user.uid,
+            email: user.email
+          }, { merge: true });
+        } catch (e) {
+          console.error("Firestore save error:", e);
+        }
+      };
+
+      // App 내부에서 사용할 로드 함수
+      const loadFromFirestore = async (user) => {
+        if (!user || !window.fb) return;
+        try {
+          const docRef = window.fb.doc(window.fb.db, "users", user.uid);
+          const docSnap = await window.fb.getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data().roadmap;
+            if (data) {
+              // 데이터 복원
+              if (data.pageTitle) setPageTitle(data.pageTitle);
+              if (data.pageSubtitle) setPageSubtitle(data.pageSubtitle);
+              if (data.startAge) setStartAge(data.startAge);
+              if (data.startYear) setStartYear(data.startYear);
+              if (data.defaultReturn) setDefaultReturn(data.defaultReturn);
+              if (data.defaultSavings) setDefaultSavings(data.defaultSavings);
+              if (data.goalTitle) setGoalTitle(data.goalTitle);
+              if (data.goalQuote) setGoalQuote(data.goalQuote);
+              if (data.savingsUnit) setSavingsUnit(data.savingsUnit);
+              if (data.allRows) setAllRows(data.allRows);
+              if (data.items) setItems(data.items);
+              if (data.yearDataStore) setYearDataStore(data.yearDataStore);
+              if (data.darkMode !== undefined) setDarkMode(data.darkMode);
+
+              setModalState({ type: 'status', data: { title: "동기화 완료", msg: "클라우드 데이터를 불러왔습니다.", icon: "cloud" } });
+            }
+          }
+        } catch (e) {
+          console.error("Firestore load error:", e);
+        }
+      };
+
+      // 인증 리스너
+      useEffect(() => {
+        const initFirebase = () => {
+          if (window.fb) {
+            window.fb.onAuthStateChanged(window.fb.auth, (user) => {
+              setCurrentUser(user);
+              if (user) {
+                loadFromFirestore(user);
+              }
+            });
+          } else {
+            setTimeout(initFirebase, 500);
+          }
+        };
+        initFirebase();
+      }, []);
+
+      const handleLogin = async () => {
+        if (!window.fb) return;
+        try {
+          await window.fb.signInWithPopup(window.fb.auth, window.fb.provider);
+        } catch (error) {
+          console.error("Login failed", error);
+          setModalState({ type: 'status', data: { title: "로그인 실패", msg: error.message, icon: "alert-triangle" } });
+        }
+      };
+
+      const handleLogout = async () => {
+        if (!window.fb) return;
+        try {
+          await window.fb.signOut(window.fb.auth);
+          setCurrentUser(null);
+          setModalState({ type: 'status', data: { title: "로그아웃", msg: "로그아웃 되었습니다.", icon: "check-circle" } });
+        } catch (error) {
+          console.error("Logout failed", error);
+        }
+      };
+
+      // 헤더 및 안내 문구 상태
+      const [pageTitle, setPageTitle] = useState('인생 로드맵 30년 시나리오');
+      const [pageSubtitle, setPageSubtitle] = useState('원하는 연도와 나이로 당신의 30년을 그려보세요.');
+
+      const [startAge, setStartAge] = useState(35);
+      const [startYear, setStartYear] = useState(new Date().getFullYear());
+      const [defaultReturn, setDefaultReturn] = useState(15);
+      const [defaultSavings, setDefaultSavings] = useState(820);
+      const [goalTitle, setGoalTitle] = useState('나의 인생 목표');
+      const [goalQuote, setGoalQuote] = useState('"성공은 계획에서 시작된다"');
+      const [savingsUnit, setSavingsUnit] = useState('만원');
+
+      const [allRows, setAllRows] = useState([
+        { id: 'beginningAssets', label: '연초자산', type: 'number', isSystem: true },
+        { id: 'investedAssets', label: '투자자산', type: 'number', isSystem: true },
+        { id: 'targetReturn', label: '수익률 (%)', type: 'number', isSystem: true },
+        { id: 'savings', label: '저축액', type: 'number', isSystem: true },
+        { id: 'yearEndAssets', label: '연말자산', type: 'calculated', isSystem: true },
+        { id: 'lifePlan', label: '라이프 플랜', type: 'textarea' },
+        { id: 'visualization', label: '시각화', type: 'image' }
+      ]);
+
+      // 연도별 데이터 마스터 저장소 (연도 이동 시 복원용)
+      const [yearDataStore, setYearDataStore] = useState(() => {
+        const saved = localStorage.getItem('roadmap_year_data');
+        return saved ? JSON.parse(saved) : {};
+      });
+
+      // 실행 취소 / 다시 실행 스택
+      const [undoStack, setUndoStack] = useState([]);
+      const [redoStack, setRedoStack] = useState([]);
+
+      const takeSnapshot = () => {
+        const snapshot = {
+          pageTitle, pageSubtitle, startAge, startYear,
+          defaultReturn, defaultSavings, goalTitle, goalQuote,
+          savingsUnit, allRows, yearDataStore, items, darkMode
+        };
+        setUndoStack(prev => [...prev.slice(-49), snapshot]); // 최대 50개 저장
+        setRedoStack([]);
+      };
+
+      const applySnapshot = (snapshot) => {
+        setPageTitle(snapshot.pageTitle);
+        setPageSubtitle(snapshot.pageSubtitle);
+        setStartAge(snapshot.startAge);
+        setStartYear(snapshot.startYear);
+        setDefaultReturn(snapshot.defaultReturn);
+        setDefaultSavings(snapshot.defaultSavings);
+        setGoalTitle(snapshot.goalTitle);
+        setGoalQuote(snapshot.goalQuote);
+        setSavingsUnit(snapshot.savingsUnit);
+        setAllRows(snapshot.allRows);
+        setYearDataStore(snapshot.yearDataStore);
+        setItems(snapshot.items);
+        setDarkMode(snapshot.darkMode);
+      };
+
+      const handleUndo = () => {
+        if (undoStack.length === 0) return;
+        const current = {
+          pageTitle, pageSubtitle, startAge, startYear,
+          defaultReturn, defaultSavings, goalTitle, goalQuote,
+          savingsUnit, allRows, yearDataStore, items, darkMode
+        };
+        const previous = undoStack[undoStack.length - 1];
+        setRedoStack(prev => [...prev, current]);
+        setUndoStack(prev => prev.slice(0, -1));
+        applySnapshot(previous);
+      };
+
+      const handleRedo = () => {
+        if (redoStack.length === 0) return;
+        const current = {
+          pageTitle, pageSubtitle, startAge, startYear,
+          defaultReturn, defaultSavings, goalTitle, goalQuote,
+          savingsUnit, allRows, yearDataStore, items, darkMode
+        };
+        const next = redoStack[redoStack.length - 1];
+        setUndoStack(prev => [...prev, current]);
+        setRedoStack(prev => prev.slice(0, -1));
+        applySnapshot(next);
+      };
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('roadmap_year_data', JSON.stringify(yearDataStore));
+        } catch (e) {
+          // 이미지 데이터가 커서 localStorage(5MB) 용량을 초과해도 
+          // 실제 '이미지 파일 저장' 기능은 html2canvas를 사용하므로 정상 작동합니다.
+          // 사용자에게 매번 팝업을 띄우지 않도록 로그로만 처리합니다.
+          console.warn("로컬 저장소 저장 실패 (용량 부족 등):", e.message);
+        }
+      }, [yearDataStore]);
+
+      const [history, setHistory] = useState(() => {
+        const saved = localStorage.getItem('roadmap_history');
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      const createBackup = (isAuto = false) => {
+        const snapshot = {
+          id: Date.now(),
+          timestamp: new Date().toLocaleString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+          }),
+          isAuto,
+          data: {
+            pageTitle, pageSubtitle, startAge, startYear,
+            defaultReturn, defaultSavings, goalTitle, goalQuote,
+            savingsUnit, allRows, items, darkMode
+          }
+        };
+
+        setHistory(prev => {
+          const newHistory = [snapshot, ...prev].slice(0, 100);
+          localStorage.setItem('roadmap_history', JSON.stringify(newHistory));
+          return newHistory;
+        });
+
+        // Firestore 저장 (로그인 시)
+        if (currentUser) {
+          saveToFirestore(currentUser, snapshot.data);
+        }
+
+        if (!isAuto) {
+          setModalState({ type: 'status', data: { title: "저장 완료", msg: currentUser ? "데이터가 클라우드와 로컬에 모두 저장되었습니다." : "데이터가 로컬에 저장되었습니다.\n(로그인 시 클라우드 저장 가능)", icon: "check-circle" } });
+        }
+      };
+
+      const restoreBackup = (backup) => {
+        const { data } = backup;
+        setPageTitle(data.pageTitle);
+        setPageSubtitle(data.pageSubtitle);
+        setStartAge(data.startAge);
+        setStartYear(data.startYear);
+        setDefaultReturn(data.defaultReturn);
+        setDefaultSavings(data.defaultSavings);
+        setGoalTitle(data.goalTitle);
+        setGoalQuote(data.goalQuote);
+        setSavingsUnit(data.savingsUnit);
+        setAllRows(data.allRows);
+        setItems(data.items);
+        setDarkMode(data.darkMode);
+        closeModal();
+        setModalState({ type: 'status', data: { title: "복구 완료", msg: `${backup.timestamp} 시점의 데이터로 복구되었습니다.`, icon: "refresh-cw" } });
+      };
+
+      // 단축키 및 자동 저장
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            createBackup(false);
+          }
+          if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+            e.preventDefault();
+            handleUndo();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') {
+            e.preventDefault();
+            handleRedo();
+          }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+
+        // 5분마다 자동 저장
+        const autoSaveTimer = setInterval(() => {
+          createBackup(true);
+        }, 5 * 60 * 1000);
+
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+          clearInterval(autoSaveTimer);
+        };
+      }, [pageTitle, pageSubtitle, startAge, startYear, defaultReturn, defaultSavings, goalTitle, goalQuote, savingsUnit, allRows, items, darkMode]);
+
+      const calculateYearEndAssets = (item) => {
+        const beg = Number(item.beginningAssets) || 0;
+        const inv = Number(item.investedAssets) || 0;
+        const sav = Number(item.savings) || 0;
+        const retPercent = Number(item.targetReturn) || 0;
+        const profit = inv * (retPercent / 100);
+
+        let total = beg + profit + sav;
+
+        // 추가된 숫자 행들 중 연산 설정된 항목 반영
+        allRows.forEach(row => {
+          if (row.type === 'number' && !row.isSystem && row.operator) {
+            const val = Number(item.dynamicData?.[row.id]) || 0;
+            if (row.operator === 'add') total += val;
+            else if (row.operator === 'subtract') total -= val;
+          }
+        });
+
+        return Math.round(total);
+      };
+
+      const [items, setItems] = useState(() => {
+        const arr = Array.from({ length: 30 }, (_, i) => {
+          const year = startYear + i;
+          const store = yearDataStore?.[year] || {};
+          return {
+            beginningAssets: store.beginningAssets !== undefined ? store.beginningAssets : 0,
+            investedAssets: store.investedAssets !== undefined ? store.investedAssets : (30000 + (year - 2026) * 5000),
+            savings: store.savings !== undefined ? store.savings : 820,
+            targetReturn: store.targetReturn !== undefined ? store.targetReturn : 15,
+            dynamicData: store.dynamicData || {}
+          };
+        });
+        if (arr[0].beginningAssets === 0) arr[0].beginningAssets = 40000;
+        for (let i = 0; i < arr.length - 1; i++) {
+          arr[i + 1].beginningAssets = calculateYearEndAssets(arr[i]);
+        }
+        return arr;
+      });
+
+      // 연도 이동 시 데이터 복원 및 동기화 (연속성 확보 버전)
+      useEffect(() => {
+        setItems(prev => {
+          // 1. 기준연도(2026)부터 마지막 가용 연도까지의 전역 데이터 흐름 계산
+          const baseYear = 2026;
+          const endYear = startYear + 30;
+          const fullTimeline = {};
+
+          // 시뮬레이션: 기준점부터 현재 화면 끝까지 계산
+          let currentBeg = yearDataStore[baseYear]?.beginningAssets !== undefined ? yearDataStore[baseYear].beginningAssets : 40000;
+
+          for (let y = baseYear; y <= endYear; y++) {
+            const store = yearDataStore[y] || {};
+            const inv = store.investedAssets !== undefined ? store.investedAssets : (30000 + (y - 2026) * 5000);
+            const sav = store.savings !== undefined ? store.savings : defaultSavings;
+            const ret = store.targetReturn !== undefined ? store.targetReturn : defaultReturn;
+
+            // 만약 해당 연도에 수동으로 연초자산을 넣었다면 해당 값 사용
+            if (store.beginningAssets !== undefined) currentBeg = store.beginningAssets;
+
+            const yearEnd = Math.round(currentBeg + (inv * (ret / 100)) + sav);
+
+            fullTimeline[y] = {
+              beginningAssets: currentBeg,
+              investedAssets: inv,
+              savings: sav,
+              targetReturn: ret,
+              yearEndAssets: yearEnd,
+              dynamicData: store.dynamicData || {}
+            };
+
+            // 다음 연도의 연초 자산은 현재 연도의 연말 자산
+            currentBeg = yearEnd;
+          }
+
+          // 2. 현재 startYear 시점에 해당하는 30년치 데이터 슬라이싱
+          const newItems = Array.from({ length: 30 }, (_, i) => {
+            const year = startYear + i;
+            return fullTimeline[year] || {
+              beginningAssets: 0,
+              investedAssets: (30000 + (year - 2026) * 5000),
+              savings: defaultSavings,
+              targetReturn: defaultReturn,
+              dynamicData: {}
+            };
+          });
+
+          return newItems;
+        });
+      }, [startYear, defaultReturn, defaultSavings, yearDataStore, allRows]);
+
+      const [modalState, setModalState] = useState({
+        type: null, // 'header', 'addRow', 'editRow'
+        data: null
+      });
+
+      const [draggedRowIndex, setDraggedRowIndex] = useState(null);
+      const [globalRowHeight, setGlobalRowHeight] = useState(80);
+
+      const startResizing = (e) => {
+        e.preventDefault();
+        const startY = e.pageY;
+        const startHeight = globalRowHeight;
+
+        const onMouseMove = (moveEvent) => {
+          const deltaY = moveEvent.pageY - startY;
+          setGlobalRowHeight(Math.max(40, startHeight + deltaY));
+        };
+
+        const onMouseUp = () => {
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+          document.body.style.cursor = 'default';
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        document.body.style.cursor = 'row-resize';
+      };
+
+      // (기존 useEffect는 위로 통합됨)
+
+      const closeModal = () => setModalState({ type: null, data: null });
+
+      const updateItem = (index, field, value) => {
+        takeSnapshot();
+        const year = startYear + index;
+        const val = ['beginningAssets', 'investedAssets', 'savings', 'targetReturn'].includes(field) ? (Number(value) || 0) : value;
+
+        // 마스터 저장소 업데이트
+        setYearDataStore(prev => ({
+          ...prev,
+          [year]: { ...prev[year], [field]: val }
+        }));
+
+        setItems(prev => {
+          const newItems = prev.map((item, i) => {
+            if (i === index) return { ...item, [field]: val };
+            return item;
+          });
+
+          // 캐스케이드 계산 (불변성 유지)
+          for (let i = index; i < newItems.length - 1; i++) {
+            const nextYear = startYear + i + 1;
+            // 다음 연도에 수동 입력된 연초자산(override)이 없을 때만 캐스케이드 진행
+            if (yearDataStore[nextYear]?.beginningAssets === undefined || i === index) {
+              const nextBegValue = calculateYearEndAssets(newItems[i]);
+              if (newItems[i + 1].beginningAssets !== nextBegValue) {
+                newItems[i + 1] = { ...newItems[i + 1], beginningAssets: nextBegValue };
+              } else {
+                // 값이 같다면 이후 변화가 없으므로 중단 가능 (최적화)
+                if (i > index) break;
+              }
+            } else {
+              break; // 수동 입력값을 만나면 캐스케이드 중단
+            }
+          }
+          return newItems;
+        });
+      };
+
+      const updateDynamicData = (index, rowId, value) => {
+        takeSnapshot();
+        const year = startYear + index;
+
+        // 해당 행이 연산(+, -)에 참여하는 행인지 확인
+        const rowDef = allRows.find(r => r.id === rowId);
+        const isOperand = rowDef && rowDef.type === 'number' && rowDef.operator;
+        const val = rowDef && rowDef.type === 'number' ? (Number(value) || 0) : value;
+
+        setItems(prev => {
+          const newItems = prev.map((item, i) => {
+            if (i === index) {
+              return {
+                ...item,
+                dynamicData: { ...item.dynamicData, [rowId]: val }
+              };
+            }
+            return item;
+          });
+
+          // 자산 연산에 참여하는 행인 경우, 미래 연도들의 연초자산 가로질러 계산(Cascade)
+          if (isOperand) {
+            for (let i = index; i < newItems.length - 1; i++) {
+              const nextYear = startYear + i + 1;
+              // 다음 연도에 수동 입력된 연초자산(override)이 없을 때만 캐스케이드 진행
+              if (yearDataStore[nextYear]?.beginningAssets === undefined) {
+                const nextBegValue = calculateYearEndAssets(newItems[i]);
+                if (newItems[i + 1].beginningAssets !== nextBegValue) {
+                  newItems[i + 1] = { ...newItems[i + 1], beginningAssets: nextBegValue };
+                } else {
+                  break; // 값이 동일하면 이후는 변화가 없으므로 중단
+                }
+              } else {
+                break; // 수동 입력값을 만나면 중단
+              }
+            }
+          }
+          return newItems;
+        });
+
+        // 마스터 저장소 업데이트
+        setYearDataStore(prev => {
+          const yearData = prev[year] || {};
+          const dynamicData = { ...(yearData.dynamicData || {}), [rowId]: val };
+          return { ...prev, [year]: { ...yearData, dynamicData } };
+        });
+      };
+
+      const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file && activeCell !== null) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            updateDynamicData(activeCell.index, activeCell.rowId, reader.result);
+            setActiveCell(null);
+          };
+          reader.readAsDataURL(file);
+        }
+        e.target.value = null;
+      };
+
+      const triggerFileInput = (index, rowId) => {
+        setActiveCell({ index, rowId });
+        fileInputRef.current?.click();
+      };
+
+      const removeImage = (e, index, rowId) => {
+        e.stopPropagation();
+        updateDynamicData(index, rowId, "");
+      };
+
+      const moveRow = (id, direction) => {
+        const index = allRows.findIndex(r => r.id === id);
+        if ((direction === 'up' && index === 0) || (direction === 'down' && index === allRows.length - 1)) return;
+
+        const newRows = [...allRows];
+        const swapIndex = direction === 'up' ? index - 1 : index + 1;
+        [newRows[index], newRows[swapIndex]] = [newRows[swapIndex], newRows[index]];
+        setAllRows(newRows);
+      };
+
+      const updateRowLabel = (id, newLabel) => {
+        setAllRows(prev => prev.map(r => r.id === id ? { ...r, label: newLabel } : r));
+      };
+
+      const deleteRow = (id) => {
+        const isSystem = ['beginningAssets', 'investedAssets', 'targetReturn', 'savings', 'yearEndAssets'].includes(id);
+        const msg = isSystem
+          ? '이 행은 가계산 로직이 포함된 기본 행입니다.\n정말 삭제하시겠습니까?'
+          : '선택한 행을 로드맵에서 삭제하시겠습니까?';
+
+        setModalState({ type: 'confirmDelete', data: { id, msg, isSystem } });
+      };
+
+      const executeDelete = () => {
+        if (modalState.data?.id) {
+          setAllRows(prev => prev.filter(r => r.id !== modalState.data.id));
+          closeModal();
+        }
+      };
+
+      const onDragStart = (e, index) => {
+        setDraggedRowIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+      };
+
+      const onDragOver = (e) => {
+        e.preventDefault();
+      };
+
+      const onDrop = (e, index) => {
+        e.preventDefault();
+        if (draggedRowIndex === null || draggedRowIndex === index) return;
+
+        const newRows = [...allRows];
+        const item = newRows.splice(draggedRowIndex, 1)[0];
+        newRows.splice(index, 0, item);
+
+        setAllRows(newRows);
+        setDraggedRowIndex(null);
+      };
+
+
+
+      const handleAutoHeight = (e) => {
+        e.target.style.height = 'auto';
+        e.target.style.height = `${e.target.scrollHeight}px`;
+      };
+
+      const downloadImage = async () => {
+        const container = roadmapRef.current;
+        if (!container) return;
+
+        if (!window.html2canvas) {
+          const script = document.createElement('script');
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+          script.onload = () => executeDownloadSplit(container);
+          document.head.appendChild(script);
+        } else {
+          executeDownloadSplit(container);
+        }
+      };
+
+      const executeDownloadSplit = async (container) => {
+        // 1. 헤더 영역 (제목, 상단 정보, 목표) 캡처 준비
+        // 2. 10년 단위 테이블 블록들을 찾음
+        const tables = container.querySelectorAll('.mb-8.md\\:mb-12.overflow-hidden.rounded-\\[1\\.5rem\\]');
+        if (tables.length === 0) return;
+
+        setModalState({ type: 'status', data: { title: "이미지 생성 중", msg: "3개의 테이블 블록을 개별 이미지로 저장합니다...", icon: "loader", animate: true } });
+
+        // 첫 번째 이미지에는 상단 정보(헤더+목표)를 포함할지 여부 결정
+        // 여기서는 각 테이블 블록만 깔끔하게 저장하는 방식으로 구현
+        for (let i = 0; i < tables.length; i++) {
+          const tableBlock = tables[i];
+          const yearText = tableBlock.querySelector('h2')?.textContent?.trim() || `Part_${i + 1}`;
+          const safeFileName = yearText.replace(/[^a-z0-9가-힣_\-~ ]/gi, '_');
+
+          await html2canvas(tableBlock, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: darkMode ? '#0f172a' : '#ffffff',
+            logging: false,
+            onclone: (clonedDoc) => {
+              // 캡처용 스타일 보정 (Input -> Div 변환 등)
+              const clonedBlock = clonedDoc.body.querySelector('.mb-8.md\\:mb-12.overflow-hidden.rounded-\\[1\\.5rem\\]'); // 예시 선택자
+              // 실제로는 html2canvas가 넘겨받은 block을 기준으로 렌더링하므로 
+              // onclone 내부에서 clonedDoc을 통해 해당 요소의 하위 엘리먼트들을 전역적으로 수정 가능
+
+              const inputs = clonedDoc.querySelectorAll('input, textarea');
+              inputs.forEach(input => {
+                const parent = input.parentElement;
+                if (parent) {
+                  const displayDiv = clonedDoc.createElement('div');
+                  displayDiv.textContent = input.value;
+                  displayDiv.className = input.className;
+                  displayDiv.style.cssText = window.getComputedStyle(input).cssText;
+                  displayDiv.style.display = 'block';
+                  displayDiv.style.whiteSpace = 'pre-wrap';
+                  displayDiv.style.wordBreak = 'break-all';
+                  displayDiv.style.textAlign = input.classList.contains('text-right') ? 'right' : 'center';
+                  input.style.display = 'none';
+                  parent.appendChild(displayDiv);
+                }
+              });
+
+              const tbls = clonedDoc.querySelectorAll('table');
+              tbls.forEach(t => {
+                t.style.width = '100%';
+                t.style.minWidth = '0';
+                t.style.tableLayout = 'fixed';
+              });
+            }
+          }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `인생로드맵_${safeFileName}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+          });
+
+          // 다운로드 사이 간격
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        setModalState({ type: 'status', data: { title: "저장 완료", msg: "3개의 조각 이미지가 다운로드되었습니다.", icon: "check-circle" } });
+      };
+
+      const downloadExcel = async () => {
+        try {
+          const Excel = window.ExcelJS || (typeof ExcelJS !== 'undefined' ? ExcelJS : null);
+          if (!Excel) {
+            setModalState({ type: 'status', data: { title: "오류 발생", msg: "엑셀 라이브러리가 로드되지 않았습니다. 페이지를 새로고침 해주세요.", icon: "alert-circle" } });
+            return;
+          }
+
+          setModalState({ type: 'status', data: { title: "파일 생성 중", msg: "엑셀 파일 생성을 시작합니다. 이미지가 많을 경우 수 초 정도 걸릴 수 있습니다.", icon: "loader", animate: true } });
+
+          const workbook = new Excel.Workbook();
+          const worksheet = workbook.addWorksheet('인생 로드맵');
+
+          // 기본 스타일 설정
+          worksheet.properties.defaultRowHeight = 25;
+
+          // 1. 문서 요약 정보 (최상단)
+          const titleRow = worksheet.addRow([pageTitle]);
+          titleRow.font = { size: 18, bold: true, color: { argb: 'FFAF1D42' } };
+
+          const subTitleRow = worksheet.addRow([pageSubtitle]);
+          subTitleRow.font = { size: 12, italic: true };
+
+          worksheet.addRow([]);
+          worksheet.addRow(['[나의 목표]', goalTitle]).font = { bold: true };
+          worksheet.addRow(['[나의 명언]', goalQuote]).font = { italic: true };
+          worksheet.addRow([]);
+          worksheet.addRow(['[기준 정보]', `시작 연도: ${startYear}년 / 시작 나이: ${startAge}세 / 화폐 단위: ${savingsUnit}`]);
+          worksheet.addRow(['* 참고: 30년 인생 시나리오가 10년 단위로 구성되어 있습니다.']);
+          worksheet.addRow([]);
+
+          // 2. 메인 데이터 테이블 구성 (10년씩 3단계로 분할)
+          for (const blockStartIndex of [0, 10, 20]) {
+            const chunk = items.slice(blockStartIndex, blockStartIndex + 10);
+
+            // 각 블록의 헤더
+            const headerValues = ['구분', ...chunk.map((_, i) => `${startYear + blockStartIndex + i}년 (${startAge + blockStartIndex + i}세)`)];
+            const headerRow = worksheet.addRow(headerValues);
+
+            headerRow.eachCell((cell) => {
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFAF1D42' } };
+              cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+              cell.alignment = { horizontal: 'center', vertical: 'middle' };
+              cell.border = {
+                top: { style: 'thin', color: { argb: 'FFEBEDF0' } },
+                left: { style: 'thin', color: { argb: 'FFEBEDF0' } },
+                bottom: { style: 'thin', color: { argb: 'FFEBEDF0' } },
+                right: { style: 'thin', color: { argb: 'FFEBEDF0' } }
+              };
+            });
+
+            // 행별 데이터 구성
+            for (const rowDef of allRows) {
+              const rowValues = [rowDef.label];
+              const isImageRow = rowDef.type === 'image';
+
+              chunk.forEach((item) => {
+                if (rowDef.id === 'yearEndAssets') {
+                  rowValues.push(calculateYearEndAssets(item));
+                } else if (rowDef.id === 'targetReturn') {
+                  rowValues.push(`${item.targetReturn}%`);
+                } else if (rowDef.isSystem) {
+                  rowValues.push(item[rowDef.id] || 0);
+                } else if (isImageRow) {
+                  rowValues.push(""); // 이미지가 들어갈 자리는 비워둠
+                } else {
+                  rowValues.push(item.dynamicData?.[rowDef.id] || '');
+                }
+              });
+
+              const newRow = worksheet.addRow(rowValues);
+
+              // 행 스타일 및 이미지 삽입
+              newRow.eachCell((cell, colNumber) => {
+                cell.alignment = { vertical: 'middle', horizontal: colNumber === 1 ? 'center' : 'right', wrapText: true };
+                cell.border = {
+                  top: { style: 'thin', color: { argb: 'FFEBEDF0' } },
+                  left: { style: 'thin', color: { argb: 'FFEBEDF0' } },
+                  bottom: { style: 'thin', color: { argb: 'FFEBEDF0' } },
+                  right: { style: 'thin', color: { argb: 'FFEBEDF0' } }
+                };
+                if (colNumber === 1) cell.font = { bold: true };
+              });
+
+              if (isImageRow) {
+                newRow.height = 120; // 이미지 행 높이 크게 설정
+                chunk.forEach((item, chunkIdx) => {
+                  const imgData = item.dynamicData?.[rowDef.id];
+                  if (imgData && imgData.includes('base64,')) {
+                    try {
+                      const base64Content = imgData.split('base64,')[1];
+                      const imageId = workbook.addImage({
+                        base64: base64Content,
+                        extension: 'png',
+                      });
+                      worksheet.addImage(imageId, {
+                        tl: { col: chunkIdx + 1, row: newRow.number - 1 },
+                        br: { col: chunkIdx + 2, row: newRow.number },
+                        editAs: 'oneCell'
+                      });
+                    } catch (e) {
+                      console.error("이미지 삽입 실패", e);
+                    }
+                  }
+                });
+              }
+            }
+
+            // 블록 사이 간격
+            worksheet.addRow([]);
+            worksheet.addRow([]);
+          }
+
+          // 전체 열 너비 설정
+          worksheet.columns.forEach((col, i) => {
+            col.width = i === 0 ? 25 : 18;
+            if (i > 0) {
+              col.alignment = { horizontal: 'center', vertical: 'middle' };
+            }
+          });
+
+          // 파일 다운로드
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `인생_로드맵_30년_이미지포함.xlsx`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          setModalState({ type: 'status', data: { title: "저장 완료", msg: "이미지가 포함된 엑셀 파일 다운로드가 완료되었습니다!", icon: "check-circle" } });
+        } catch (error) {
+          console.error("엑셀 다운로드 오류:", error);
+          setModalState({ type: 'status', data: { title: "오류 발생", msg: `엑셀 생성 중 오류가 발생했습니다: ${error.message}`, icon: "alert-triangle" } });
+        }
+      };
+
+      const renderTable = (startIndex) => {
+        const chunk = items.slice(startIndex, startIndex + 10);
+        const borderColor = darkMode ? 'border-slate-700' : 'border-slate-300';
+        const headerBg = darkMode ? 'bg-brand-800' : 'bg-brand-600';
+        const rowHeaderBg = darkMode ? 'bg-slate-800/80' : 'bg-slate-50';
+
+        return (
+          <div key={startIndex} className={`mb-8 md:mb-12 overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm border ${borderColor} p-4 md:p-6 ${darkMode ? 'bg-slate-900 shadow-brand-950/20' : 'bg-white'} transition-all`}>
+            <div className="flex items-center justify-between mb-4 md:mb-6 px-2">
+              <h2 className={`text-xl md:text-3xl font-black flex items-center gap-4 ${darkMode ? 'text-brand-300' : 'text-brand-700'} tracking-tighter`}>
+                <span className="text-3xl md:text-4xl drop-shadow-md">👑</span>
+                {startYear + startIndex}년 ~ {startYear + startIndex + 9}년
+              </h2>
+              <div className="md:hidden text-[10px] bg-brand-500/10 text-brand-600 px-3 py-1 rounded-full font-bold animate-pulse">
+                옆으로 슬라이드 →
+              </div>
+            </div>
+            <div className="overflow-x-auto scrollbar-hide pb-2">
+              <table className={`w-full border-collapse border border-slate-200 dark:border-brand-900/30 text-[11px] table-fixed min-w-[1400px]`}>
+                <thead>
+                  <tr className={`${headerBg} text-white shadow-lg relative`}>
+                    <th className={`border border-white/10 p-4 w-44 text-sm font-black uppercase tracking-tighter relative group/header`}>
+                      구분
+                      <div
+                        onMouseDown={startResizing}
+                        className="absolute bottom-0 left-0 w-full h-1.5 cursor-row-resize bg-white/20 hover:bg-white/40 opacity-0 group-hover/header:opacity-100 transition-opacity z-10"
+                        title="드래그하여 행 높이 조절"
+                      ></div>
+                    </th>
+                    {chunk.map((_, i) => (
+                      <th key={i} className={`border border-white/10 p-2 text-center`}>
+                        <div className="text-xl font-black">{startYear + startIndex + i}년</div>
+                        <div className="text-xs opacity-80 font-bold uppercase">{startAge + startIndex + i}세</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allRows.map((row, rowIndex) => {
+                    const isYearEnd = row.id === 'yearEndAssets';
+                    const rowBg = isYearEnd ? (darkMode ? 'bg-brand-900/40' : 'bg-brand-50') : 'transition-colors hover:bg-slate-500/5';
+                    const textColor = isYearEnd ? (darkMode ? 'text-brand-300' : 'text-brand-700 font-black') : 'text-slate-700 dark:text-slate-200';
+
+                    return (
+                      <tr
+                        key={row.id}
+                        draggable
+                        onDragStart={(e) => onDragStart(e, rowIndex)}
+                        onDragOver={onDragOver}
+                        onDrop={(e) => onDrop(e, rowIndex)}
+                        className={`${rowBg} cursor-move`}
+                        style={{ height: `${row.isSystem ? Math.max(40, globalRowHeight * 0.5) : globalRowHeight}px` }}
+                      >
+                        <td className={`${rowHeaderBg} border ${borderColor} p-3 font-black text-center text-sm relative group align-middle overflow-hidden`}>
+                          <div className={`flex flex-col items-center justify-center gap-2 h-full relative`}>
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-300 opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              <Icon name="grip-vertical" size={16} />
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteRow(row.id);
+                              }}
+                              className="absolute right-1 top-1 p-1.5 bg-red-500/10 text-red-500/40 hover:text-red-600 hover:bg-red-500/20 opacity-100 transition-all z-20 cursor-pointer rounded-lg"
+                              title="행 삭제"
+                            >
+                              <Icon name="trash-2" size={16} />
+                            </button>
+
+                            <div className="flex items-center justify-center gap-2">
+                              {row.operator === 'add' && <span className="bg-emerald-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">+</span>}
+                              {row.operator === 'subtract' && <span className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">-</span>}
+                              <input
+                                value={row.label}
+                                onChange={(e) => updateRowLabel(row.id, e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full bg-transparent text-center outline-none border-b border-transparent focus:border-brand-500 transition-all pb-1 break-all leading-tight cursor-text text-slate-800 dark:text-slate-100 z-10"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        {chunk.map((item, i) => {
+                          const globalIdx = startIndex + i;
+                          let content;
+
+                          if (row.id === 'yearEndAssets') {
+                            content = (
+                              <div className="p-2 text-right font-black text-[15px]">
+                                {calculateYearEndAssets(item).toLocaleString()}
+                              </div>
+                            );
+                          } else if (row.type === 'number' || row.id === 'beginningAssets' || row.id === 'investedAssets' || row.id === 'savings') {
+                            const val = row.isSystem ? item[row.id] : item.dynamicData?.[row.id];
+                            content = (
+                              <input
+                                type="text"
+                                value={row.isSystem ? Number(val || 0).toLocaleString() : (item.dynamicData?.[row.id] || "")}
+                                onChange={(e) => {
+                                  const cleaned = e.target.value.replace(/,/g, '').replace(/[^0-9.\-]/g, '');
+                                  row.isSystem
+                                    ? updateItem(globalIdx, row.id, cleaned)
+                                    : updateDynamicData(globalIdx, row.id, cleaned);
+                                }}
+                                className={`w-full text-right p-1 bg-transparent pr-3 outline-none font-black text-[15px] ${row.id === 'investedAssets' ? 'text-brand-600 dark:text-brand-400' :
+                                  row.id === 'savings' ? 'text-orange-500 dark:text-orange-400' :
+                                    row.operator === 'add' ? 'text-emerald-600 dark:text-emerald-400' :
+                                      row.operator === 'subtract' ? 'text-red-500 dark:text-red-400' :
+                                        'text-slate-700 dark:text-white'
+                                  }`}
+                              />
+                            );
+                          } else if (row.id === 'targetReturn') {
+                            content = (
+                              <div className="flex items-center justify-end w-full px-2 group/input">
+                                <input
+                                  type="text"
+                                  value={item.targetReturn}
+                                  onChange={(e) => {
+                                    const cleaned = e.target.value.replace(/[^0-9.]/g, '');
+                                    updateItem(globalIdx, 'targetReturn', cleaned);
+                                  }}
+                                  className="w-12 text-right p-1 font-black bg-transparent outline-none text-emerald-500 dark:text-emerald-400 text-[15px]"
+                                />
+                                <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-[15px] leading-none">%</span>
+                              </div>
+                            );
+                          } else if (row.type === 'image') {
+                            const cellData = item.dynamicData?.[row.id];
+                            content = (
+                              <div
+                                onClick={() => cellData ? setModalState({ type: 'previewImage', data: cellData }) : triggerFileInput(globalIdx, row.id)}
+                                className={`w-full min-h-[90px] relative group border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${cellData ? 'border-transparent' : (darkMode ? 'border-slate-700 hover:border-slate-500 bg-slate-900 shadow-inner' : 'border-slate-200 hover:border-slate-300 bg-slate-50')}`}
+                              >
+                                {cellData ? (
+                                  <>
+                                    <img src={cellData} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                      <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-black border border-white/30">클릭 확대</div>
+                                      <button onClick={(e) => { e.stopPropagation(); removeImage(e, globalIdx, row.id); }} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black mt-2">삭제</button>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <><Icon name="plus" size={24} className="text-slate-300 mb-1" /><span className="text-[10px] font-bold text-slate-400">이미지 추가</span></>
+                                )}
+                              </div>
+                            );
+                          } else {
+                            const cellData = item.dynamicData?.[row.id] || "";
+                            content = (
+                              <textarea
+                                value={cellData}
+                                onChange={(e) => { updateDynamicData(globalIdx, row.id, e.target.value); handleAutoHeight(e); }}
+                                placeholder="입력..."
+                                className="w-full min-h-[100px] p-3 text-[12px] bg-transparent resize-none outline-none overflow-hidden font-medium leading-relaxed scrollbar-hide focus:bg-brand-500/5 dark:focus:bg-brand-500/10 rounded-xl transition-all text-slate-700 dark:text-white"
+                              />
+                            );
+                          }
+
+                          return (
+                            <td key={i} className={`border ${borderColor} p-1 align-middle`}>
+                              {content}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div className={`min-h-screen transition-all ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'NanumSquare, sans-serif' }}>
+          <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+
+          {/* 모달: 헤더(제목/부제목) 수정 */}
+          <Modal
+            isOpen={modalState.type === 'header'}
+            onClose={closeModal}
+            title="헤더 내용 수정"
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">메인 제목</label>
+                <input
+                  type="text"
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
+                  value={pageTitle}
+                  onChange={e => setPageTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">서브 안내 문구</label>
+                <textarea
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-bold outline-none focus:ring-2 focus:ring-brand-500 min-h-[100px] text-slate-700 dark:text-slate-200"
+                  value={pageSubtitle}
+                  onChange={e => setPageSubtitle(e.target.value)}
+                />
+              </div>
+              <button onClick={closeModal} className="w-full py-4 bg-brand text-white rounded-2xl font-black text-lg shadow-xl shadow-brand/20 hover:scale-[1.02] transition-transform">저장하기</button>
+            </div>
+          </Modal>
+
+          {/* 모달: 행 추가/수정 */}
+          <Modal
+            isOpen={modalState.type === 'addRow' || modalState.type === 'editRow'}
+            onClose={closeModal}
+            title={modalState.type === 'addRow' ? '새로운 행 추가' : '행 정보 수정'}
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">행 이름 (라벨)</label>
+                <input
+                  id="row-label-input"
+                  type="text"
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
+                  defaultValue={modalState.data?.label || ''}
+                  placeholder="예: 라이프 플랜, 자기 개발"
+                />
+              </div>
+              {modalState.type === 'addRow' && (
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 형태</label>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <button id="type-text" onClick={(e) => {
+                      document.getElementById('type-text').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                      document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                      document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                      window._selectedType = 'textarea';
+                      document.getElementById('operator-section').classList.add('hidden');
+                    }} className="py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-black transition-all bg-brand-600 text-white border-brand-600 dark:text-slate-100">텍스트</button>
+                    <button id="type-number" onClick={(e) => {
+                      document.getElementById('type-number').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                      document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                      document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                      window._selectedType = 'number';
+                      document.getElementById('operator-section').classList.remove('hidden');
+                    }} className="py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-black transition-all text-slate-700 dark:text-slate-300">숫자</button>
+                    <button id="type-image" onClick={(e) => {
+                      document.getElementById('type-image').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                      document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                      document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                      window._selectedType = 'image';
+                      document.getElementById('operator-section').classList.add('hidden');
+                    }} className="py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-black transition-all text-slate-700 dark:text-slate-300">이미지</button>
+                  </div>
+
+                  <div id="operator-section" className={modalState.data?.type === 'number' || window._selectedType === 'number' ? "" : "hidden"}>
+                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 연산 (연말자산 반영)</label>
+                    <select id="row-operator-select" defaultValue={modalState.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 mb-4">
+                      <option value="">연산 없음 (그냥 기록)</option>
+                      <option value="add">자산에 합산 (+)</option>
+                      <option value="subtract">자산에서 차감 (-)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+              {modalState.type === 'editRow' && modalState.data?.type === 'number' && (
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 연산 (연말자산 반영)</label>
+                  <select id="row-edit-operator-select" defaultValue={modalState.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100">
+                    <option value="">연산 없음 (그냥 기록)</option>
+                    <option value="add">자산에 합산 (+)</option>
+                    <option value="subtract">자산에서 차감 (-)</option>
+                  </select>
+                </div>
+              )}
+              <div className="flex gap-4 pt-2">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 py-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                >
+                  취소
+                </button>
+                <button onClick={() => {
+                  const val = document.getElementById('row-label-input').value;
+                  if (!val) {
+                    setModalState({ type: 'status', data: { title: "입력 오류", msg: "행 이름을 입력해주세요.", icon: "alert-circle" } });
+                    return;
+                  }
+
+                  if (modalState.type === 'addRow') {
+                    const newId = `row_${Date.now()}`;
+                    const operator = document.getElementById('row-operator-select')?.value || null;
+                    setAllRows(prev => [...prev, { id: newId, label: val, type: window._selectedType || 'textarea', operator }]);
+                  } else {
+                    const operator = document.getElementById('row-edit-operator-select')?.value || modalState.data.operator;
+                    setAllRows(prev => prev.map(r => r.id === modalState.data.id ? { ...r, label: val, operator } : r));
+                  }
+                  closeModal();
+                }} className="flex-[2] py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-brand-900/30 hover:scale-[1.02] transition-all">확인</button>
+              </div>
+            </div>
+          </Modal>
+
+          {/* 모달: 삭제 확인 */}
+          <Modal
+            isOpen={modalState.type === 'confirmDelete'}
+            onClose={closeModal}
+            title="삭제 확인"
+          >
+            <div className="space-y-6 text-center py-4">
+              <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-500 mb-4 animate-bounce">
+                <Icon name="alert-triangle" size={40} />
+              </div>
+              <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
+                {modalState.data?.msg}
+              </p>
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={executeDelete}
+                  className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-red-500/20 hover:scale-[1.02] transition-all"
+                >
+                  삭제하기
+                </button>
+              </div>
+            </div>
+          </Modal>
+
+          {/* 모달: 사진 확대 보기 */}
+          <Modal
+            isOpen={modalState.type === 'previewImage'}
+            onClose={closeModal}
+            maxWidth="max-w-5xl"
+          >
+            <div className="flex items-center justify-center bg-black/5 rounded-2xl overflow-hidden min-h-[400px]">
+              <img src={modalState.data} className="max-w-full max-h-[85vh] object-contain shadow-2xl" alt="미리보기" />
+            </div>
+          </Modal>
+
+          {/* 모달: 상태 알림 (Alert 대체) */}
+          <Modal
+            isOpen={modalState.type === 'status'}
+            onClose={closeModal}
+            title={modalState.data?.title || "알림"}
+          >
+            <div className="space-y-6 text-center py-6">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
+                modalState.data?.icon === 'alert-triangle' || modalState.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
+                  'bg-brand-100 text-brand-500'
+                }`}>
+                <Icon name={modalState.data?.icon || "info"} size={40} className={modalState.data?.animate ? "animate-spin" : ""} />
+              </div>
+              <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
+                {modalState.data?.msg}
+              </p>
+              <button
+                onClick={closeModal}
+                className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-brand-900/30 transition-all"
+              >
+                확인
+              </button>
+            </div>
+          </Modal>
+
+          {/* 모달: 저장 기록 (히스토리) */}
+          <Modal
+            isOpen={modalState.type === 'history'}
+            onClose={closeModal}
+            title="데이터 저장 기록 (최대 100개)"
+            maxWidth="max-w-2xl"
+          >
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-hide">
+              {history.length === 0 ? (
+                <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <Icon name="database-zap" size={48} className="mx-auto text-slate-300 mb-4" />
+                  <p className="text-slate-500 font-bold">저장된 기록이 없습니다.<br />데이터 수정 시 5분마다 자동 저장됩니다.</p>
+                </div>
+              ) : (
+                history.map((backup) => (
+                  <div key={backup.id} className="group flex items-center justify-between p-5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-brand-500/50 hover:bg-brand-50/30 dark:hover:bg-brand-900/10 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${backup.isAuto ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-brand-100 dark:bg-brand-900 text-brand-500'}`}>
+                        <Icon name={backup.isAuto ? "cpu" : "save"} size={20} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-black text-slate-800 dark:text-white">{backup.timestamp}</span>
+                          {backup.isAuto && <span className="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-[10px] px-2 py-0.5 rounded-full font-bold">자동백업</span>}
+                        </div>
+                        <p className="text-xs text-slate-400 font-medium">데이터 스냅샷 {backup.id}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => restoreBackup(backup)}
+                      className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-black text-slate-700 dark:text-slate-200 hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-all"
+                    >
+                      복구하기
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs text-slate-400 font-bold">
+              <p>💾 Ctrl + S 단축키로 즉시 저장이 가능합니다.</p>
+              <button onClick={() => { if (confirm('모든 기록을 삭제하시겠습니까?')) { setHistory([]); localStorage.removeItem('roadmap_history'); } }} className="text-red-400 hover:text-red-600 transition-colors">전체 기록 삭제</button>
+            </div>
+          </Modal>
+
+          <div className="max-w-[1750px] mx-auto p-4 md:p-8">
+            <div className={`flex flex-col md:flex-row justify-between items-center mb-6 md:mb-10 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl border-t-[8px] border-brand-600 gap-8 transition-all relative overflow-hidden ${darkMode ? 'bg-slate-900 shadow-brand-950/20' : 'bg-white'}`}>
+              <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block pointer-events-none">
+                <Icon name="book-open" size={120} />
+              </div>
+              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 flex-1 w-full">
+                <div className="flex-1 w-full text-center md:text-left">
+                  <input
+                    value={pageTitle}
+                    onChange={e => setPageTitle(e.target.value)}
+                    className="w-full text-3xl md:text-5xl font-black mb-1 md:mb-2 tracking-tighter leading-tight text-slate-800 dark:text-white bg-transparent outline-none hover:bg-brand-500/5 rounded-2xl p-2 transition-all"
+                  />
+                  <textarea
+                    value={pageSubtitle}
+                    onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
+                    className="w-full text-slate-500 font-bold text-sm md:text-lg dark:text-white break-keep bg-transparent outline-none resize-none hover:bg-brand-500/5 rounded-2xl p-2 transition-all overflow-hidden"
+                    rows={1}
+                    onFocus={handleAutoHeight}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                {currentUser ? (
+                  <button
+                    onClick={handleLogout}
+                    className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px]"
+                  >
+                    <div className="bg-white/20 p-2 rounded-xl">
+                      <Icon name="log-out" size={20} />
+                    </div>
+                    <span>로그아웃</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleLogin}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px] animate-pulse"
+                  >
+                    <div className="bg-white/20 p-2 rounded-xl">
+                      <Icon name="log-in" size={20} />
+                    </div>
+                    <span>동기화 로그인</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
+                  className="bg-brand-500 hover:bg-brand-600 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg shadow-brand-500/20 transition-all active:scale-95 min-w-[140px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="layers" size={20} />
+                  </div>
+                  <span>행 추가</span>
+                </button>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl border border-slate-200 dark:border-slate-700 min-w-[140px]"
+                >
+                  <div className={`p-2 rounded-xl ${darkMode ? 'bg-yellow-400/20' : 'bg-brand-600/10'}`}>
+                    {darkMode ? <Icon name="sun" size={20} className="text-yellow-400" /> : <Icon name="moon" size={20} className="text-brand-600" />}
+                  </div>
+                  <span>{darkMode ? '라이트' : '다크'}</span>
+                </button>
+                <button
+                  onClick={() => setModalState({ type: 'history' })}
+                  className="bg-slate-500 hover:bg-slate-600 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-slate-500/20 transition-all active:scale-95 min-w-[140px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="history" size={20} />
+                  </div>
+                  <span>기록</span>
+                </button>
+                <button
+                  onClick={downloadExcel}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/20 transition-all active:scale-95 min-w-[160px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="table-2" size={20} />
+                  </div>
+                  <span>Excel 저장</span>
+                </button>
+                <button
+                  onClick={downloadImage}
+                  className="bg-brand-700 hover:bg-brand-800 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-brand-700/30 transition-all active:scale-95 min-w-[160px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="image-plus" size={20} />
+                  </div>
+                  <span>이미지 저장</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="roadmap-container" ref={roadmapRef} className={`p-5 md:p-10 rounded-[2rem] md:rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-800/50 ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
+              <div className="mb-8 md:mb-12 pb-6 md:pb-8 border-b-2 border-slate-100 dark:border-slate-900 flex flex-wrap gap-4 md:gap-8 items-stretch justify-between">
+                <div className="flex flex-col gap-4 w-full">
+                  <div className="flex flex-wrap gap-3 md:gap-6 items-stretch bg-slate-50 dark:bg-slate-900/80 p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-brand-900/30 shadow-inner w-full transition-all">
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="calendar" className="text-brand-600 dark:text-brand-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">연도</span>
+                      <input type="number" value={startYear} onChange={e => setStartYear(parseInt(e.target.value) || 0)} className="w-full bg-transparent text-center font-black text-brand-600 dark:text-brand-400 text-base md:text-xl outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="user" className="text-brand-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">나이</span>
+                      <input type="number" value={startAge} onChange={e => setStartAge(parseInt(e.target.value) || 0)} className="w-full bg-transparent text-center font-black text-brand-400 text-base md:text-xl outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="trending-up" className="text-emerald-500 dark:text-emerald-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">수익률</span>
+                      <div className="flex items-center justify-center w-full">
+                        <input type="number" value={defaultReturn} onChange={e => setDefaultReturn(parseInt(e.target.value) || 0)} className="w-12 md:w-20 bg-transparent text-right font-black text-emerald-600 dark:text-emerald-400 text-base md:text-xl outline-none" />
+                        <span className="font-black text-emerald-500 dark:text-emerald-400 text-base md:text-xl ml-1">%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="wallet" className="text-brand-500" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">저축액</span>
+                      <input type="text" value={Number(defaultSavings).toLocaleString()} onChange={e => setDefaultSavings(Number(e.target.value.replace(/,/g, '')) || 0)} className="w-full bg-transparent text-center font-black text-brand-500 dark:text-brand-400 text-base md:text-xl outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="coins" className="text-brand-400 pulse-slow shrink-0" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">단위</span>
+                      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 w-full md:w-auto">
+                        {['원', '천원', '만원'].map(u => (
+                          <button
+                            key={u}
+                            onClick={() => setSavingsUnit(u)}
+                            className={`flex-1 md:px-3 py-1.5 rounded-md font-black text-[10px] md:text-xs transition-all ${savingsUnit === u
+                              ? 'bg-brand-600 text-white shadow-md'
+                              : 'text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-slate-800 font-bold'
+                              }`}
+                          >
+                            {u}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-14 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border-2 border-brand-500/10 bg-gradient-to-r from-brand-500/5 via-transparent to-brand-500/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block">
+                  <Icon name="target" size={120} />
+                </div>
+                <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-600 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-2xl shrink-0 transition-transform hover:scale-105 shadow-brand-900/40">목표</div>
+                <div className="flex-1 space-y-2 w-full">
+                  <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
+                  <textarea
+                    value={goalQuote}
+                    onChange={e => { setGoalQuote(e.target.value); handleAutoHeight(e); }}
+                    className="w-full text-lg md:text-2xl italic bg-transparent outline-none resize-none font-bold text-slate-400 dark:text-white break-keep p-2 text-center md:text-left"
+                    rows={1}
+                    onFocus={handleAutoHeight}
+                  />
+                </div>
+              </div>
+
+              {/* 자산 계산 수식 및 시스템 안내 바 */}
+              <div id="formula-section" className="mb-10 space-y-4">
+                <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-2 h-full bg-brand-600"></div>
+
+                  {/* 수식 영역 */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl border border-brand-100 dark:border-brand-800">
+                        <span className="font-black text-brand-700 dark:text-brand-300 text-base md:text-lg">연말자산</span>
+                      </div>
+                    </div>
+
+                    <span className="text-2xl font-black text-slate-300 dark:text-slate-700">=</span>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">연초자산</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-brand-500/40">+</span>
+
+                    <div className="flex items-center bg-slate-50 dark:bg-slate-800/50 px-5 py-3 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 gap-3">
+                      <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">투자자산</span>
+                      <span className="text-xl font-black text-slate-300">×</span>
+                      <span className="font-bold text-emerald-500 dark:text-emerald-400 text-sm md:text-base">수익률</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-brand-500/40">+</span>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-bold text-orange-500 dark:text-orange-400 text-sm md:text-base">저축액</span>
+                    </div>
+                  </div>
+
+                  {/* 설명 영역 (그리드) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10">
+                      <div className="bg-brand-600 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-brand-600/20">
+                        <Icon name="refresh-cw" size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">실시간 자산 연동 시스템</h4>
+                        <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
+                          올해의 <span className="text-brand-600 font-bold">연말자산</span>은 자동으로 내년도의 <span className="text-brand-600 font-bold">연초자산</span>으로 이월되어 30년 로드맵이 유기적으로 완성됩니다.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                      <div className="bg-emerald-500 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-emerald-500/20">
+                        <Icon name="edit-3" size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">전 항목 자유로운 수기 수정</h4>
+                        <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
+                          연초자산, 투자자산, 수익률, 저축액 등의 항목을 직접 수정할 수 있으며, 수정 시 이후 연도 데이터에 즉시 반영됩니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 시점 이동 컨트롤러 (표 바로 위로 이동) */}
+              <div id="timeline-controller" className="mb-10 flex flex-wrap items-center justify-center gap-4 px-2 py-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
+                <span className="text-sm font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 mr-2 bg-brand-500/10 px-5 py-2 rounded-full border border-brand-500/20">로드맵 시점 이동</span>
+                <div className="flex gap-3">
+                  {[
+                    { label: '1년 전', val: -1, icon: 'chevron-left', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' },
+                    { label: '오늘', val: 0, icon: 'refresh-cw', color: 'bg-brand-600 text-white z-10 shadow-lg shadow-brand-500/20' },
+                    { label: '1년 후', val: 1, icon: 'chevron-right', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' }
+                  ].map(btn => (
+                    <button
+                      key={btn.label}
+                      onClick={() => {
+                        takeSnapshot();
+                        if (btn.val === 0) {
+                          const todayYear = new Date().getFullYear();
+                          const diff = todayYear - startYear;
+                          setStartYear(todayYear);
+                          setStartAge(prev => prev + diff);
+                        } else {
+                          setStartYear(prev => prev + btn.val);
+                          setStartAge(prev => prev + btn.val);
+                        }
+                      }}
+                      className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-sm font-black transition-all active:scale-95 border ${btn.color} hover:border-brand-500 hover:scale-105`}
+                    >
+                      <Icon name={btn.icon} size={16} />
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {[0, 10, 20].map(startIndex => renderTable(startIndex))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+
+</html>
