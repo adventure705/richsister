@@ -289,7 +289,7 @@
       const [pageTitle, setPageTitle] = useState('인생 로드맵 30년 시나리오');
       const [pageSubtitle, setPageSubtitle] = useState('원하는 연도와 나이로 당신의 30년을 그려보세요.');
 
-      const [startAge, setStartAge] = useState(35);
+      const [startAge, setStartAge] = useState(30);
       const [startYear, setStartYear] = useState(new Date().getFullYear());
       const [defaultReturn, setDefaultReturn] = useState(15);
       const [defaultSavings, setDefaultSavings] = useState(820);
@@ -490,13 +490,13 @@
           const store = yearDataStore?.[year] || {};
           return {
             beginningAssets: store.beginningAssets !== undefined ? store.beginningAssets : 0,
-            investedAssets: store.investedAssets !== undefined ? store.investedAssets : (30000 + (year - 2026) * 5000),
+            investedAssets: store.investedAssets !== undefined ? store.investedAssets : 0,
             savings: store.savings !== undefined ? store.savings : 820,
             targetReturn: store.targetReturn !== undefined ? store.targetReturn : 15,
             dynamicData: store.dynamicData || {}
           };
         });
-        if (arr[0].beginningAssets === 0) arr[0].beginningAssets = 40000;
+        // Removed forced initialization of beginningAssets
         for (let i = 0; i < arr.length - 1; i++) {
           arr[i + 1].beginningAssets = calculateYearEndAssets(arr[i]);
         }
@@ -512,11 +512,11 @@
           const fullTimeline = {};
 
           // 시뮬레이션: 기준점부터 현재 화면 끝까지 계산
-          let currentBeg = yearDataStore[baseYear]?.beginningAssets !== undefined ? yearDataStore[baseYear].beginningAssets : 40000;
+          let currentBeg = yearDataStore[baseYear]?.beginningAssets !== undefined ? yearDataStore[baseYear].beginningAssets : 0;
 
           for (let y = baseYear; y <= endYear; y++) {
             const store = yearDataStore[y] || {};
-            const inv = store.investedAssets !== undefined ? store.investedAssets : (30000 + (y - 2026) * 5000);
+            const inv = store.investedAssets !== undefined ? store.investedAssets : 0;
             const sav = store.savings !== undefined ? store.savings : defaultSavings;
             const ret = store.targetReturn !== undefined ? store.targetReturn : defaultReturn;
 
@@ -543,7 +543,7 @@
             const year = startYear + i;
             return fullTimeline[year] || {
               beginningAssets: 0,
-              investedAssets: (30000 + (year - 2026) * 5000),
+              investedAssets: 0,
               savings: defaultSavings,
               targetReturn: defaultReturn,
               dynamicData: {}
