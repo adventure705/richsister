@@ -1406,6 +1406,7 @@
                 <input
                   id="row-label-input"
                   type="text"
+                  spellCheck="false"
                   className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
                   defaultValue={modalState.data?.label || ''}
                   placeholder="예: 라이프 플랜, 자기 개발"
@@ -1606,11 +1607,13 @@
                 <input
                   value={pageTitle}
                   onChange={e => setPageTitle(e.target.value)}
+                  spellCheck="false"
                   className="w-full text-3xl md:text-5xl font-black mb-2 tracking-tighter leading-tight text-slate-800 dark:text-white bg-transparent outline-none text-center"
                 />
                 <textarea
                   value={pageSubtitle}
                   onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
+                  spellCheck="false"
                   className="w-full text-slate-500 font-bold text-sm md:text-lg dark:text-gray-300 break-keep bg-transparent outline-none resize-none text-center overflow-hidden"
                   rows={1}
                   onFocus={handleAutoHeight}
@@ -1752,10 +1755,11 @@
                 </div>
                 <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-600 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-2xl shrink-0 transition-transform hover:scale-105 shadow-brand-900/40">목표</div>
                 <div className="flex-1 space-y-2 w-full">
-                  <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
+                  <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} spellCheck="false" className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
                   <textarea
                     value={goalQuote}
                     onChange={e => { setGoalQuote(e.target.value); handleAutoHeight(e); }}
+                    spellCheck="false"
                     className="w-full text-lg md:text-2xl italic bg-transparent outline-none resize-none font-bold text-slate-400 dark:text-white break-keep p-2 text-center md:text-left"
                     rows={1}
                     onFocus={handleAutoHeight}
@@ -1851,8 +1855,7 @@
                       }}
                       className={`flex items-center justify-center gap-3 px-6 py-3 rounded-2xl text-sm font-black transition-all active:scale-95 border ${btn.color} hover:border-brand-500 hover:scale-105 w-full md:w-auto`}
                     >
-                      <Icon name={btn.icon} size={16} />
-                      <span>{btn.label}</span>
+                      {btn.label}
                     </button>
                   ))}
                 </div>
