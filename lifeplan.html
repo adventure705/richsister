@@ -866,7 +866,7 @@
 
             const compressed = await compressImage(file);
             updateDynamicData(activeCell.index, activeCell.rowId, compressed);
-            setModalState(null); // 완료 후 모달 닫기
+            closeModal(); // 완료 후 모달 닫기 (setModalState(null) 사용 시 렌더링 에러 발생 가능하여 수정)
           } catch (error) {
             console.error("Image processing error:", error);
             setModalState({ type: 'status', data: { title: "처리 오류", msg: "이미지 압축 중 오류가 발생했습니다.", icon: "alert-triangle" } });
@@ -1420,19 +1420,19 @@
             </div>
             {/* 모달: 상태 알림 (로그인 실패 시 등) */}
             <Modal
-              isOpen={modalState.type === 'status'}
+              isOpen={modalState?.type === 'status'}
               onClose={closeModal}
-              title={modalState.data?.title || "알림"}
+              title={modalState?.data?.title || "알림"}
             >
               <div className="space-y-6 text-center py-6 text-slate-800">
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
-                  modalState.data?.icon === 'alert-triangle' || modalState.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState?.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
+                  modalState?.data?.icon === 'alert-triangle' || modalState?.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
                     'bg-brand-100 text-brand-500'
                   }`}>
-                  <Icon name={modalState.data?.icon || "info"} size={40} className={modalState.data?.animate ? "animate-spin" : ""} />
+                  <Icon name={modalState?.data?.icon || "info"} size={40} className={modalState?.data?.animate ? "animate-spin" : ""} />
                 </div>
                 <p className="font-bold text-lg whitespace-pre-wrap leading-relaxed">
-                  {modalState.data?.msg}
+                  {modalState?.data?.msg}
                 </p>
                 <button
                   onClick={closeModal}
@@ -1450,11 +1450,11 @@
         <div className={`min-h-screen transition-all ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'NanumSquare, sans-serif' }}>
           <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
 
-          {/* 모달: 헤더(제목/부제목) 수정 */}
+          {/* 모달: 제목 편집 */}
           <Modal
-            isOpen={modalState.type === 'header'}
+            isOpen={modalState?.type === 'header'}
             onClose={closeModal}
-            title="헤더 내용 수정"
+            title="문서 제목 및 안내 수정"
           >
             <div className="space-y-6">
               <div>
@@ -1480,9 +1480,9 @@
 
           {/* 모달: 행 추가/수정 */}
           <Modal
-            isOpen={modalState.type === 'addRow' || modalState.type === 'editRow'}
+            isOpen={modalState?.type === 'addRow' || modalState?.type === 'editRow'}
             onClose={closeModal}
-            title={modalState.type === 'addRow' ? '새로운 행 추가' : '행 정보 수정'}
+            title={modalState?.type === 'addRow' ? '새로운 행 추가' : '행 정보 수정'}
           >
             <div className="space-y-6">
               <div>
@@ -1492,88 +1492,70 @@
                   type="text"
                   spellCheck="false"
                   className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
-                  defaultValue={modalState.data?.label || ''}
+                  defaultValue={modalState?.data?.label || ''}
                   placeholder="예: 라이프 플랜, 자기 개발"
                 />
               </div>
-              {modalState.type === 'addRow' && (
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 형태</label>
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <button id="type-text" onClick={(e) => {
-                      document.getElementById('type-text').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
-                      document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                      document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                      window._selectedType = 'textarea';
-                      document.getElementById('operator-section').classList.add('hidden');
-                    }} className="py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-black transition-all bg-brand-600 text-white border-brand-600 dark:text-slate-100">텍스트</button>
-                    <button id="type-number" onClick={(e) => {
-                      document.getElementById('type-number').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
-                      document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                      document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                      window._selectedType = 'number';
-                      document.getElementById('operator-section').classList.remove('hidden');
-                    }} className="py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-black transition-all text-slate-700 dark:text-slate-300">숫자</button>
-                    <button id="type-image" onClick={(e) => {
-                      document.getElementById('type-image').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
-                      document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                      document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                      window._selectedType = 'image';
-                      document.getElementById('operator-section').classList.add('hidden');
-                    }} className="py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-black transition-all text-slate-700 dark:text-slate-300">이미지</button>
-                  </div>
 
-                  <div id="operator-section" className={modalState.data?.type === 'number' || window._selectedType === 'number' ? "" : "hidden"}>
-                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 연산 (연말자산 반영)</label>
-                    <select id="row-operator-select" defaultValue={modalState.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 mb-4">
-                      <option value="">연산 없음 (그냥 기록)</option>
-                      <option value="add">자산에 합산 (+)</option>
-                      <option value="subtract">자산에서 차감 (-)</option>
-                    </select>
-                  </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 타입</label>
+                <div className="grid grid-cols-3 gap-3">
+                  <button id="type-text" onClick={(e) => {
+                    document.getElementById('type-text').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    window._selectedType = 'textarea';
+                    document.getElementById('operator-section').classList.add('hidden');
+                  }} className={`py-4 rounded-2xl border font-black transition-all ${(!modalState?.data || modalState?.data?.type === 'textarea') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>텍스트</button>
+                  <button id="type-number" onClick={(e) => {
+                    document.getElementById('type-number').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    window._selectedType = 'number';
+                    document.getElementById('operator-section').classList.remove('hidden');
+                  }} className={`py-4 rounded-2xl border font-black transition-all ${(modalState?.data?.type === 'number') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>숫자</button>
+                  <button id="type-image" onClick={(e) => {
+                    document.getElementById('type-image').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    window._selectedType = 'image';
+                    document.getElementById('operator-section').classList.add('hidden');
+                  }} className={`py-4 rounded-2xl border font-black transition-all ${(modalState?.data?.type === 'image') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>이미지</button>
                 </div>
-              )}
-              {modalState.type === 'editRow' && modalState.data?.type === 'number' && (
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 연산 (연말자산 반영)</label>
-                  <select id="row-edit-operator-select" defaultValue={modalState.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100">
+
+                <div id="operator-section" className={modalState?.data?.type === 'number' || window._selectedType === 'number' ? "" : "hidden"}>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 mt-4">데이터 연산 (연말자산 반영)</label>
+                  <select id="row-operator-select" defaultValue={modalState?.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 mb-4">
                     <option value="">연산 없음 (그냥 기록)</option>
                     <option value="add">자산에 합산 (+)</option>
                     <option value="subtract">자산에서 차감 (-)</option>
                   </select>
                 </div>
-              )}
-              <div className="flex gap-4 pt-2">
-                <button
-                  onClick={closeModal}
-                  className="flex-1 py-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
-                >
-                  취소
-                </button>
-                <button onClick={() => {
-                  const val = document.getElementById('row-label-input').value;
-                  if (!val) {
-                    setModalState({ type: 'status', data: { title: "입력 오류", msg: "행 이름을 입력해주세요.", icon: "alert-circle" } });
-                    return;
-                  }
+              </div>
+              <button
+                onClick={() => {
+                  const label = document.getElementById('row-label-input').value;
+                  if (!label) return alert('행 이름을 입력해주세요.');
+                  const type = window._selectedType || 'textarea';
+                  const operator = document.getElementById('row-operator-select')?.value || "";
 
-                  if (modalState.type === 'addRow') {
-                    const newId = `row_${Date.now()}`;
-                    const operator = document.getElementById('row-operator-select')?.value || null;
-                    setAllRows(prev => [...prev, { id: newId, label: val, type: window._selectedType || 'textarea', operator }]);
+                  if (modalState?.type === 'addRow') {
+                    addRow(label, type, operator);
                   } else {
-                    const operator = document.getElementById('row-edit-operator-select')?.value || modalState.data.operator;
-                    setAllRows(prev => prev.map(r => r.id === modalState.data.id ? { ...r, label: val, operator } : r));
+                    updateRowInfo(modalState?.data?.id, label, type, operator);
                   }
                   closeModal();
-                }} className="flex-[2] py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-brand-900/30 hover:scale-[1.02] transition-all">확인</button>
-              </div>
+                }}
+                className="w-full py-5 bg-brand-600 text-white rounded-2xl font-black text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                {modalState?.type === 'addRow' ? '생성하기' : '수정 완료'}
+              </button>
             </div>
           </Modal>
 
           {/* 모달: 삭제 확인 */}
           <Modal
-            isOpen={modalState.type === 'confirmDelete'}
+            isOpen={modalState?.type === 'confirmDelete'}
             onClose={closeModal}
             title="삭제 확인"
           >
@@ -1582,12 +1564,12 @@
                 <Icon name="alert-triangle" size={40} />
               </div>
               <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
-                {modalState.data?.msg}
+                {modalState?.data?.msg}
               </p>
               <div className="flex gap-4 pt-4">
                 <button
                   onClick={closeModal}
-                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
                 >
                   취소
                 </button>
@@ -1601,32 +1583,33 @@
             </div>
           </Modal>
 
-          {/* 모달: 사진 확대 보기 */}
+          {/* 모달: 이미지 확대 */}
           <Modal
-            isOpen={modalState.type === 'previewImage'}
+            isOpen={modalState?.type === 'previewImage'}
             onClose={closeModal}
-            maxWidth="max-w-5xl"
+            title="이미지 크게 보기"
+            maxWidth="max-w-4xl"
           >
-            <div className="flex items-center justify-center bg-black/5 rounded-2xl overflow-hidden min-h-[400px]">
-              <img src={modalState.data} className="max-w-full max-h-[85vh] object-contain shadow-2xl" alt="미리보기" />
+            <div className="p-2">
+              <img src={modalState?.data} className="w-full rounded-2xl shadow-2xl" />
             </div>
           </Modal>
 
           {/* 모달: 상태 알림 (Alert 대체) */}
           <Modal
-            isOpen={modalState.type === 'status'}
+            isOpen={modalState?.type === 'status'}
             onClose={closeModal}
-            title={modalState.data?.title || "알림"}
+            title={modalState?.data?.title || "알림"}
           >
             <div className="space-y-6 text-center py-6">
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
-                modalState.data?.icon === 'alert-triangle' || modalState.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState?.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
+                modalState?.data?.icon === 'alert-triangle' || modalState?.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
                   'bg-brand-100 text-brand-500'
                 }`}>
-                <Icon name={modalState.data?.icon || "info"} size={40} className={modalState.data?.animate ? "animate-spin" : ""} />
+                <Icon name={modalState?.data?.icon || "info"} size={40} className={modalState?.data?.animate ? "animate-spin" : ""} />
               </div>
               <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
-                {modalState.data?.msg}
+                {modalState?.data?.msg}
               </p>
               <button
                 autoFocus
@@ -1641,7 +1624,7 @@
 
           {/* 모달: 저장 기록 (히스토리) */}
           <Modal
-            isOpen={modalState.type === 'history'}
+            isOpen={modalState?.type === 'history'}
             onClose={closeModal}
             title="데이터 저장 기록 (최대 100개)"
             maxWidth="max-w-2xl"
