@@ -1618,27 +1618,28 @@
               {/* Auth Buttons: Top Right on Desktop */}
               <div className="absolute top-6 right-6 z-20 hidden md:block">
                 {currentUser ? (
-                  <div className="flex gap-3">
+                  <div className="flex bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 shadow-lg gap-1">
                     <button
                       onClick={() => loadFromFirestore(currentUser, true)}
-                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 text-sm"
+                      className="bg-transparent hover:bg-white/10 text-slate-700 dark:text-white px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-xs"
                       title="서버에서 데이터 강제 불러오기"
                     >
-                      <Icon name="cloud-download" size={18} />
+                      <Icon name="cloud-download" size={16} />
                       <span>불러오기</span>
                     </button>
+                    <div className="w-[1px] bg-white/20 my-1"></div>
                     <button
                       onClick={handleLogout}
-                      className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-700/20 transition-all active:scale-95 text-sm"
+                      className="bg-gradient-to-r from-[#af1d42] to-[#8a1734] hover:from-[#c72e59] hover:to-[#a01a3d] text-white px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition-all text-xs"
                     >
-                      <Icon name="log-out" size={18} />
+                      <Icon name="log-out" size={16} />
                       <span>로그아웃</span>
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={handleLogin}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all active:scale-95 text-sm animate-pulse"
+                    className="bg-gradient-to-r from-[#af1d42] to-[#8a1734] hover:from-[#c72e59] hover:to-[#a01a3d] text-white px-5 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-rose-900/20 transition-all active:scale-95 text-sm animate-pulse"
                   >
                     <Icon name="log-in" size={18} />
                     <span>구글 연동 로그인</span>
@@ -1653,10 +1654,10 @@
                   {currentUser ? (
                     <>
                       <button onClick={() => loadFromFirestore(currentUser, true)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">불러오기</button>
-                      <button onClick={handleLogout} className="bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold">로그아웃</button>
+                      <button onClick={handleLogout} className="bg-[#af1d42] text-white px-3 py-1.5 rounded-lg text-xs font-bold">로그아웃</button>
                     </>
                   ) : (
-                    <button onClick={handleLogin} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">로그인</button>
+                    <button onClick={handleLogin} className="bg-[#af1d42] text-white px-3 py-1.5 rounded-lg text-xs font-bold">로그인</button>
                   )}
                 </div>
 
@@ -1678,21 +1679,21 @@
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={createBackup}
-                    className="bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand-600/20 transition-all active:scale-95 flex-1 min-w-[140px]"
+                    className="bg-gradient-to-r from-[#af1d42] to-[#8a1734] hover:from-[#c72e59] hover:to-[#a01a3d] text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-rose-900/20 transition-all active:scale-95 flex-1 min-w-[120px]"
                   >
                     <Icon name="save" size={20} />
                     <span>저장하기</span>
                   </button>
                   <button
                     onClick={downloadExcel}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex-1 min-w-[150px]"
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex-1 min-w-[120px]"
                   >
                     <Icon name="table-2" size={20} />
                     <span>Excel 다운로드</span>
                   </button>
                   <button
                     onClick={downloadImage}
-                    className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 transition-all active:scale-95 flex-1 min-w-[150px]"
+                    className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 transition-all active:scale-95 flex-1 min-w-[120px]"
                   >
                     <Icon name="image-plus" size={20} />
                     <span>이미지 다운로드</span>
@@ -1702,21 +1703,21 @@
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
-                    className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-700/20 transition-all active:scale-95 flex-1 min-w-[140px]"
+                    className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-700/20 transition-all active:scale-95 flex-1 min-w-[100px]"
                   >
                     <Icon name="layers" size={18} />
                     <span>행 추가</span>
                   </button>
                   <button
                     onClick={() => setModalState({ type: 'history' })}
-                    className="bg-slate-500 hover:bg-slate-600 text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-500/20 transition-all active:scale-95 flex-1 min-w-[140px]"
+                    className="bg-slate-500 hover:bg-slate-600 text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-500/20 transition-all active:scale-95 flex-1 min-w-[100px]"
                   >
                     <Icon name="history" size={18} />
                     <span>백업 기록 관리</span>
                   </button>
                   <button
                     onClick={() => setDarkMode(!darkMode)}
-                    className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl border border-slate-200 dark:border-slate-700 flex-1 min-w-[140px]"
+                    className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl border border-slate-200 dark:border-slate-700 flex-1 min-w-[100px]"
                   >
                     {darkMode ? <Icon name="sun" size={18} className="text-yellow-400" /> : <Icon name="moon" size={18} className="text-brand-600" />}
                     <span>{darkMode ? '라이트 모드' : '다크 모드'}</span>
