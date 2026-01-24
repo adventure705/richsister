@@ -272,12 +272,16 @@
       useEffect(() => {
         const initFirebase = () => {
           if (window.fb) {
-            window.fb.onAuthStateChanged(window.fb.auth, (user) => {
+            window.fb.onAuthStateChanged(window.fb.auth, async (user) => {
               setCurrentUser(user);
-              setIsAuthChecking(false);
+
               if (user) {
-                loadFromFirestore(user);
+                // 로그인된 경우: 데이터를 모두 불러온 뒤에 화면을 보여줌
+                await loadFromFirestore(user);
               }
+
+              // 로딩 해제 (비로그인 or 데이터 로드 완료 후)
+              setIsAuthChecking(false);
             });
           } else {
             setTimeout(initFirebase, 500);
