@@ -85,7 +85,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCK_FPWI4TIDOJQ1TQ1lYN-QwO-D1Gw2fg",
@@ -112,7 +112,8 @@
       onAuthStateChanged,
       doc,
       getDoc,
-      setDoc
+      setDoc,
+      onSnapshot
     };
 
     // 로드 완료 이벤트 발생 (옵션)
@@ -223,8 +224,25 @@
         }, { merge: true });
       };
 
-      // App 내부에서 사용할 로드 함수
-      // App 내부에서 사용할 로드 함수
+      // 데이터 적용 헬퍼 함수
+      const applyDataToState = (data) => {
+        if (!data) return;
+        if (data.pageTitle) setPageTitle(data.pageTitle);
+        if (data.pageSubtitle) setPageSubtitle(data.pageSubtitle);
+        if (data.startAge) setStartAge(data.startAge);
+        if (data.startYear) setStartYear(data.startYear);
+        if (data.defaultReturn) setDefaultReturn(data.defaultReturn);
+        if (data.defaultSavings) setDefaultSavings(data.defaultSavings);
+        if (data.goalTitle) setGoalTitle(data.goalTitle);
+        if (data.goalQuote) setGoalQuote(data.goalQuote);
+        if (data.savingsUnit) setSavingsUnit(data.savingsUnit);
+        if (data.allRows) setAllRows(data.allRows);
+        if (data.items) setItems(data.items);
+        if (data.yearDataStore) setYearDataStore(data.yearDataStore);
+        if (data.darkMode !== undefined) setDarkMode(data.darkMode);
+      };
+
+      // App 내부에서 사용할 로드 함수 (수동 로드용)
       const loadFromFirestore = async (user, isManual = false) => {
         if (!user || !window.fb) return;
         if (isManual) {
@@ -238,21 +256,7 @@
           if (docSnap.exists()) {
             const data = docSnap.data().roadmap;
             if (data) {
-              // 데이터 복원
-              if (data.pageTitle) setPageTitle(data.pageTitle);
-              if (data.pageSubtitle) setPageSubtitle(data.pageSubtitle);
-              if (data.startAge) setStartAge(data.startAge);
-              if (data.startYear) setStartYear(data.startYear);
-              if (data.defaultReturn) setDefaultReturn(data.defaultReturn);
-              if (data.defaultSavings) setDefaultSavings(data.defaultSavings);
-              if (data.goalTitle) setGoalTitle(data.goalTitle);
-              if (data.goalQuote) setGoalQuote(data.goalQuote);
-              if (data.savingsUnit) setSavingsUnit(data.savingsUnit);
-              if (data.allRows) setAllRows(data.allRows);
-              if (data.items) setItems(data.items);
-              if (data.yearDataStore) setYearDataStore(data.yearDataStore);
-              if (data.darkMode !== undefined) setDarkMode(data.darkMode);
-
+              applyDataToState(data);
               setModalState({ type: 'status', data: { title: "동기화 완료", msg: "클라우드에서 최신 데이터를 불러왔습니다.", icon: "cloud" } });
             }
           } else {
@@ -268,26 +272,64 @@
         }
       };
 
-      // 인증 리스너
+      // 인증 및 실시간 데이터 동기화 리스너
       useEffect(() => {
+        let unsubscribeSnapshot = null;
+
         const initFirebase = () => {
           if (window.fb) {
-            window.fb.onAuthStateChanged(window.fb.auth, async (user) => {
+            window.fb.onAuthStateChanged(window.fb.auth, (user) => {
               setCurrentUser(user);
 
-              if (user) {
-                // 로그인된 경우: 데이터를 모두 불러온 뒤에 화면을 보여줌
-                await loadFromFirestore(user);
+              // 이전에 구독 중이었다면 해지
+              if (unsubscribeSnapshot) {
+                unsubscribeSnapshot();
+                unsubscribeSnapshot = null;
               }
 
-              // 로딩 해제 (비로그인 or 데이터 로드 완료 후)
-              setIsAuthChecking(false);
+              if (user) {
+                // 로그인 시: 실시간 리스너 연결
+                try {
+                  const docRef = window.fb.doc(window.fb.db, "users", user.uid);
+                  unsubscribeSnapshot = window.fb.onSnapshot(docRef, { includeMetadataChanges: true }, (doc) => {
+                    // 로컬에서 방금 저장한 쓰기(Write)에 의한 이벤트는 무시하고, 서버에서 온 것만 처리할 수도 있으나
+                    // 간단히 모든 변경을 반영하여 동기화 보장. (원하는 동작: 기기간 동기화)
+                    // doc.metadata.hasPendingWrites는 로컬에서 변경이 발생하여 아직 서버에 반영되지 않은 경우 true
+                    // 이 경우, 로컬 상태는 이미 최신이므로 다시 적용할 필요는 없지만,
+                    // 다른 기기에서 변경된 경우 (hasPendingWrites: false)는 적용해야 함.
+                    // 여기서는 모든 변경을 적용하여 항상 최신 상태를 유지하도록 함.
+                    if (doc.exists()) {
+                      const data = doc.data().roadmap;
+                      applyDataToState(data);
+                    } else {
+                      // 문서가 존재하지 않는 경우 (예: 사용자 문서가 삭제됨)
+                      // 또는 초기 로드 시 문서가 없는 경우
+                      // 이 경우, 기본 상태로 초기화하거나 사용자에게 알릴 수 있음.
+                      // 여기서는 단순히 데이터가 없음을 의미하므로, 기존 상태 유지.
+                    }
+                    setIsAuthChecking(false); // 첫 스냅샷 수신 후 로딩 상태 해제
+                  }, (error) => {
+                    console.error("Realtime sync error:", error);
+                    setIsAuthChecking(false); // 에러 발생 시 로딩 상태 해제
+                  });
+                } catch (e) {
+                  console.error("Snapshot attach error", e);
+                  setIsAuthChecking(false); // 리스너 설정 중 에러 발생 시 로딩 상태 해제
+                }
+              } else {
+                // 로그아웃 시
+                setIsAuthChecking(false); // 비로그인 상태이므로 로딩 상태 해제
+              }
             });
           } else {
             setTimeout(initFirebase, 500);
           }
         };
         initFirebase();
+
+        return () => {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+        };
       }, []);
 
       const handleLogin = async () => {
