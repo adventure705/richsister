@@ -376,17 +376,7 @@
         setDarkMode(false);
       };
 
-      const handleLogout = async () => {
-        if (!window.fb) return;
-        try {
-          await window.fb.signOut(window.fb.auth);
-          setCurrentUser(null);
-          resetState(); // [중요] 화면 초기화 (다른 유저를 위해)
-          setModalState({ type: 'status', data: { title: "로그아웃", msg: "로그아웃 되었습니다.", icon: "check-circle" } });
-        } catch (error) {
-          console.error("Logout failed", error);
-        }
-      };
+
 
       // 헤더 및 안내 문구 상태
       const [pageTitle, setPageTitle] = useState('인생 로드맵 30년 시나리오');
@@ -580,6 +570,26 @@
           clearInterval(autoSaveTimer);
         };
       }, [pageTitle, pageSubtitle, startAge, startYear, defaultReturn, defaultSavings, goalTitle, goalQuote, savingsUnit, allRows, items, darkMode]);
+
+      const handleLogout = async () => {
+        if (!window.fb) return;
+        try {
+          // [중요] 로그아웃 전 마지막 데이터 자동 저장
+          setModalState({ type: 'status', data: { title: "로그아웃 중", msg: "데이터를 안전하게 저장하고 있습니다...", icon: "save", animate: true } });
+
+          if (currentUser) {
+            await createBackup(true);
+          }
+
+          await window.fb.signOut(window.fb.auth);
+          setCurrentUser(null);
+          resetState();
+          setModalState({ type: 'status', data: { title: "로그아웃", msg: "데이터를 저장하고 안전하게 로그아웃 되었습니다.", icon: "check-circle" } });
+        } catch (error) {
+          console.error("Logout failed", error);
+          setModalState({ type: 'status', data: { title: "오류", msg: "로그아웃 중 문제가 발생했습니다.", icon: "alert-triangle" } });
+        }
+      };
 
       const calculateYearEndAssets = (item) => {
         const beg = Number(item.beginningAssets) || 0;
