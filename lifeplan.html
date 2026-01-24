@@ -1218,8 +1218,9 @@
 
       if (isAuthChecking) {
         return (
-          <div className="min-h-screen bg-brand-600 flex items-center justify-center">
-            <Icon name="loader" className="text-white animate-spin" size={48} />
+          <div className="min-h-screen bg-brand-600 flex flex-col items-center justify-center gap-6 animate-pulse">
+            <Icon name="loader" className="text-white animate-spin" size={60} />
+            <p className="text-white text-xl font-bold tracking-widest opacity-90">데이터 동기화 중...</p>
           </div>
         );
       }
