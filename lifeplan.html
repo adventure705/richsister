@@ -174,6 +174,7 @@
             </div>
 
           </div>
+
         </div>
       );
     };
@@ -405,6 +406,16 @@
       const [undoStack, setUndoStack] = useState([]);
       const [redoStack, setRedoStack] = useState([]);
 
+      // 토스트 메시지 상태
+      const [saveToast, setSaveToast] = useState(null);
+      const toastTimerRef = useRef(null);
+
+      const triggerToast = (msg, icon = 'check-circle') => {
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        setSaveToast({ msg, icon });
+        toastTimerRef.current = setTimeout(() => setSaveToast(null), 3000);
+      };
+
       const takeSnapshot = () => {
         const snapshot = {
           pageTitle, pageSubtitle, startAge, startYear,
@@ -483,15 +494,10 @@
 
         // 클라우드 저장
         if (currentUser) {
-          if (!isAuto) {
-            setModalState({ type: 'status', data: { title: "클라우드 저장 중", msg: "데이터를 안전한 서버로 전송하고 있습니다...", icon: "loader", animate: true } });
-          }
-
           try {
             await saveToFirestore(currentUser, snapshot.data);
-
             if (!isAuto) {
-              setModalState({ type: 'status', data: { title: "저장 성공", msg: "데이터가 클라우드에 안전하게 저장되었습니다.", icon: "check-circle" } });
+              triggerToast("클라우드 저장 완료");
             }
           } catch (e) {
             console.error("Cloud save failed:", e);
@@ -502,7 +508,7 @@
         } else {
           // 비로그인 상태면 경고
           if (!isAuto) {
-            setModalState({ type: 'status', data: { title: "임시 저장 완료", msg: "데이터가 임시로 메모리에 저장되었습니다.\n⚠️ 주의: 새로고침하거나 창을 닫으면 데이터가 사라집니다.\n로그인하여 클라우드에 안전하게 저장하세요.", icon: "alert-circle" } });
+            triggerToast("임시 저장 완료 (비로그인)", "alert-circle");
           }
         }
       };
@@ -1935,7 +1941,22 @@
               {[0, 10, 20].map(startIndex => renderTable(startIndex))}
             </div>
           </div>
-        </div >
+
+          {/* 실시간 알림 토스트 (오른쪽 상단) */}
+          {saveToast && (
+            <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-full">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-brand-900/40 shadow-2xl rounded-2xl px-6 py-4 flex items-center gap-4 min-w-[240px]">
+                <div className={`p-2 rounded-xl ${saveToast.icon === 'alert-circle' ? 'bg-orange-100 text-orange-500' : 'bg-brand-100 text-brand-600'}`}>
+                  <Icon name={saveToast.icon} size={24} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-slate-800 dark:text-white leading-tight">{saveToast.msg}</p>
+                  <p className="text-[10px] text-slate-400 font-bold mt-0.5">Cloud Synced</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       );
     };
 
