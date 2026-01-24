@@ -593,23 +593,39 @@
 
             const yearEnd = Math.round(currentBeg + (inv * (ret / 100)) + sav);
 
+            // 중요: allRows를 순회하며 dynamicData에 따른 추가 연산 수행
+            let finalYearEnd = yearEnd;
+            if (store.dynamicData) {
+              allRows.forEach(row => {
+                if (row.type === 'number' && !row.isSystem && row.operator) {
+                  const val = Number(store.dynamicData[row.id]) || 0;
+                  if (row.operator === 'add') finalYearEnd += val;
+                  else if (row.operator === 'subtract') finalYearEnd -= val;
+                }
+              });
+            }
+
             fullTimeline[y] = {
               beginningAssets: currentBeg,
               investedAssets: inv,
               savings: sav,
               targetReturn: ret,
-              yearEndAssets: yearEnd,
+              yearEndAssets: finalYearEnd,
               dynamicData: store.dynamicData || {}
             };
 
             // 다음 연도의 연초 자산은 현재 연도의 연말 자산
-            currentBeg = yearEnd;
+            currentBeg = finalYearEnd;
           }
 
           // 2. 현재 startYear 시점에 해당하는 30년치 데이터 슬라이싱
           const newItems = Array.from({ length: 30 }, (_, i) => {
             const year = startYear + i;
-            return fullTimeline[year] || {
+            // yearDataStore에 있는 데이터가 우선
+            const calculated = fullTimeline[year];
+            if (calculated) return calculated;
+
+            return {
               beginningAssets: 0,
               investedAssets: 0,
               savings: defaultSavings,
@@ -701,6 +717,22 @@
         const isOperand = rowDef && rowDef.type === 'number' && rowDef.operator;
         const val = rowDef && rowDef.type === 'number' ? (Number(value) || 0) : value;
 
+        // [중요] 마스터 데이터 스토어(yearDataStore) 업데이트
+        setYearDataStore(prev => {
+          const currentYearStore = prev[year] || {};
+          return {
+            ...prev,
+            [year]: {
+              ...currentYearStore,
+              dynamicData: {
+                ...(currentYearStore.dynamicData || {}),
+                [rowId]: val
+              }
+            }
+          };
+        });
+
+        // UI 즉시 업데이트 (setItems)
         setItems(prev => {
           const newItems = prev.map((item, i) => {
             if (i === index) {
@@ -731,14 +763,9 @@
           }
           return newItems;
         });
-
-        // 마스터 저장소 업데이트
-        setYearDataStore(prev => {
-          const yearData = prev[year] || {};
-          const dynamicData = { ...(yearData.dynamicData || {}), [rowId]: val };
-          return { ...prev, [year]: { ...yearData, dynamicData } };
-        });
       };
+
+
 
       const handleImageUpload = (e) => {
         const file = e.target.files[0];
