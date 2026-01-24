@@ -196,6 +196,7 @@
 
       // Firebase User State
       const [currentUser, setCurrentUser] = useState(null);
+      const [isAuthChecking, setIsAuthChecking] = useState(true);
 
       // Firestore 저장/로드 헬퍼 함수
       // Firestore 저장/로드 헬퍼 함수
@@ -269,6 +270,7 @@
           if (window.fb) {
             window.fb.onAuthStateChanged(window.fb.auth, (user) => {
               setCurrentUser(user);
+              setIsAuthChecking(false);
               if (user) {
                 loadFromFirestore(user);
               }
@@ -1178,6 +1180,14 @@
         );
       };
 
+      if (isAuthChecking) {
+        return (
+          <div className="min-h-screen bg-brand-600 flex items-center justify-center">
+            <Icon name="loader" className="text-white animate-spin" size={48} />
+          </div>
+        );
+      }
+
       if (!currentUser) {
         return (
           <div className="min-h-screen bg-brand-600 flex flex-col items-center justify-center p-6 text-white text-center animate-in">
@@ -1501,250 +1511,251 @@
               </div>
               <div className="flex flex-wrap items-center justify-center gap-4">
                 {currentUser ? (
+                  <>
+                    <button
+                      onClick={handleLogout}
+                      className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px]"
+                    >
+                      <div className="bg-white/20 p-2 rounded-xl">
+                        <Icon name="log-out" size={20} />
+                      </div>
+                      <span>로그아웃</span>
+                    </button>
+                    <button
+                      onClick={() => loadFromFirestore(currentUser, true)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px]"
+                      title="서버에서 데이터 강제 불러오기"
+                    >
+                      <div className="bg-white/20 p-2 rounded-xl">
+                        <Icon name="cloud-download" size={20} />
+                      </div>
+                      <span>불러오기</span>
+                    </button>
+                  </>
+                ) : (
                   <button
-                    onClick={handleLogout}
-                    className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px]"
+                    onClick={handleLogin}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px] animate-pulse"
                   >
                     <div className="bg-white/20 p-2 rounded-xl">
-                      <Icon name="log-out" size={20} />
+                      <Icon name="log-in" size={20} />
                     </div>
-                    <span>로그아웃</span>
+                    <span>동기화 로그인</span>
                   </button>
-                  <button
-                     onClick={() => loadFromFirestore(currentUser, true)}
-                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px]"
-                     title="서버에서 데이터 강제 불러오기"
-                  >
-                     <div className="bg-white/20 p-2 rounded-xl">
-                       <Icon name="cloud-download" size={20} />
-                     </div>
-                     <span>불러오기</span>
-                  </button>
-                </>
-              ) : (
-              <button
-                onClick={handleLogin}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 min-w-[140px] animate-pulse"
-              >
-                <div className="bg-white/20 p-2 rounded-xl">
-                  <Icon name="log-in" size={20} />
-                </div>
-                <span>동기화 로그인</span>
-              </button>
                 )}
-              <button
-                onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
-                className="bg-brand-500 hover:bg-brand-600 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg shadow-brand-500/20 transition-all active:scale-95 min-w-[140px]"
-              >
-                <div className="bg-white/20 p-2 rounded-xl">
-                  <Icon name="layers" size={20} />
+                <button
+                  onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
+                  className="bg-brand-500 hover:bg-brand-600 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg shadow-brand-500/20 transition-all active:scale-95 min-w-[140px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="layers" size={20} />
+                  </div>
+                  <span>행 추가</span>
+                </button>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl border border-slate-200 dark:border-slate-700 min-w-[140px]"
+                >
+                  <div className={`p-2 rounded-xl ${darkMode ? 'bg-yellow-400/20' : 'bg-brand-600/10'}`}>
+                    {darkMode ? <Icon name="sun" size={20} className="text-yellow-400" /> : <Icon name="moon" size={20} className="text-brand-600" />}
+                  </div>
+                  <span>{darkMode ? '라이트' : '다크'}</span>
+                </button>
+                <button
+                  onClick={() => setModalState({ type: 'history' })}
+                  className="bg-slate-500 hover:bg-slate-600 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-slate-500/20 transition-all active:scale-95 min-w-[140px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="history" size={20} />
+                  </div>
+                  <span>기록</span>
+                </button>
+                <button
+                  onClick={downloadExcel}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/20 transition-all active:scale-95 min-w-[160px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="table-2" size={20} />
+                  </div>
+                  <span>Excel 저장</span>
+                </button>
+                <button
+                  onClick={downloadImage}
+                  className="bg-brand-700 hover:bg-brand-800 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-brand-700/30 transition-all active:scale-95 min-w-[160px]"
+                >
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Icon name="image-plus" size={20} />
+                  </div>
+                  <span>이미지 저장</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="roadmap-container" ref={roadmapRef} className={`p-5 md:p-10 rounded-[2rem] md:rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-800/50 ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
+              <div className="mb-8 md:mb-12 pb-6 md:pb-8 border-b-2 border-slate-100 dark:border-slate-900 flex flex-wrap gap-4 md:gap-8 items-stretch justify-between">
+                <div className="flex flex-col gap-4 w-full">
+                  <div className="flex flex-wrap gap-3 md:gap-6 items-stretch bg-slate-50 dark:bg-slate-900/80 p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-brand-900/30 shadow-inner w-full transition-all">
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="calendar" className="text-brand-600 dark:text-brand-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">연도</span>
+                      <input type="number" value={startYear} onChange={e => setStartYear(parseInt(e.target.value) || 0)} className="w-full bg-transparent text-center font-black text-brand-600 dark:text-brand-400 text-base md:text-xl outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="user" className="text-brand-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">나이</span>
+                      <input type="number" value={startAge} onChange={e => setStartAge(parseInt(e.target.value) || 0)} className="w-full bg-transparent text-center font-black text-brand-400 text-base md:text-xl outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="trending-up" className="text-emerald-500 dark:text-emerald-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">수익률</span>
+                      <div className="flex items-center justify-center w-full">
+                        <input type="number" value={defaultReturn} onChange={e => setDefaultReturn(parseInt(e.target.value) || 0)} className="w-12 md:w-20 bg-transparent text-right font-black text-emerald-600 dark:text-emerald-400 text-base md:text-xl outline-none" />
+                        <span className="font-black text-emerald-500 dark:text-emerald-400 text-base md:text-xl ml-1">%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="wallet" className="text-brand-500" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">저축액</span>
+                      <input type="text" value={Number(defaultSavings).toLocaleString()} onChange={e => setDefaultSavings(Number(e.target.value.replace(/,/g, '')) || 0)} className="w-full bg-transparent text-center font-black text-brand-500 dark:text-brand-400 text-base md:text-xl outline-none" />
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="coins" className="text-brand-400 pulse-slow shrink-0" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">단위</span>
+                      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 w-full md:w-auto">
+                        {['원', '천원', '만원'].map(u => (
+                          <button
+                            key={u}
+                            onClick={() => setSavingsUnit(u)}
+                            className={`flex-1 md:px-3 py-1.5 rounded-md font-black text-[10px] md:text-xs transition-all ${savingsUnit === u
+                              ? 'bg-brand-600 text-white shadow-md'
+                              : 'text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-slate-800 font-bold'
+                              }`}
+                          >
+                            {u}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
-                <span>행 추가</span>
-              </button>
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl border border-slate-200 dark:border-slate-700 min-w-[140px]"
-              >
-                <div className={`p-2 rounded-xl ${darkMode ? 'bg-yellow-400/20' : 'bg-brand-600/10'}`}>
-                  {darkMode ? <Icon name="sun" size={20} className="text-yellow-400" /> : <Icon name="moon" size={20} className="text-brand-600" />}
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-14 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border-2 border-brand-500/10 bg-gradient-to-r from-brand-500/5 via-transparent to-brand-500/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block">
+                  <Icon name="target" size={120} />
                 </div>
-                <span>{darkMode ? '라이트' : '다크'}</span>
-              </button>
-              <button
-                onClick={() => setModalState({ type: 'history' })}
-                className="bg-slate-500 hover:bg-slate-600 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-slate-500/20 transition-all active:scale-95 min-w-[140px]"
-              >
-                <div className="bg-white/20 p-2 rounded-xl">
-                  <Icon name="history" size={20} />
+                <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-600 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-2xl shrink-0 transition-transform hover:scale-105 shadow-brand-900/40">목표</div>
+                <div className="flex-1 space-y-2 w-full">
+                  <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
+                  <textarea
+                    value={goalQuote}
+                    onChange={e => { setGoalQuote(e.target.value); handleAutoHeight(e); }}
+                    className="w-full text-lg md:text-2xl italic bg-transparent outline-none resize-none font-bold text-slate-400 dark:text-white break-keep p-2 text-center md:text-left"
+                    rows={1}
+                    onFocus={handleAutoHeight}
+                  />
                 </div>
-                <span>기록</span>
-              </button>
-              <button
-                onClick={downloadExcel}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/20 transition-all active:scale-95 min-w-[160px]"
-              >
-                <div className="bg-white/20 p-2 rounded-xl">
-                  <Icon name="table-2" size={20} />
+              </div>
+
+              {/* 자산 계산 수식 및 시스템 안내 바 */}
+              <div id="formula-section" className="mb-10 space-y-4">
+                <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-2 h-full bg-brand-600"></div>
+
+                  {/* 수식 영역 */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl border border-brand-100 dark:border-brand-800">
+                        <span className="font-black text-brand-700 dark:text-brand-300 text-base md:text-lg">연말자산</span>
+                      </div>
+                    </div>
+
+                    <span className="text-2xl font-black text-slate-300 dark:text-slate-700">=</span>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">연초자산</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-brand-500/40">+</span>
+
+                    <div className="flex items-center bg-slate-50 dark:bg-slate-800/50 px-5 py-3 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 gap-3">
+                      <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">투자자산</span>
+                      <span className="text-xl font-black text-slate-300">×</span>
+                      <span className="font-bold text-emerald-500 dark:text-emerald-400 text-sm md:text-base">수익률</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-brand-500/40">+</span>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-bold text-orange-500 dark:text-orange-400 text-sm md:text-base">저축액</span>
+                    </div>
+                  </div>
+
+                  {/* 설명 영역 (그리드) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10">
+                      <div className="bg-brand-600 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-brand-600/20">
+                        <Icon name="refresh-cw" size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">실시간 자산 연동 시스템</h4>
+                        <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
+                          올해의 <span className="text-brand-600 font-bold">연말자산</span>은 자동으로 내년도의 <span className="text-brand-600 font-bold">연초자산</span>으로 이월되어 30년 로드맵이 유기적으로 완성됩니다.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                      <div className="bg-emerald-500 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-emerald-500/20">
+                        <Icon name="edit-3" size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">전 항목 자유로운 수기 수정</h4>
+                        <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
+                          연초자산, 투자자산, 수익률, 저축액 등의 항목을 직접 수정할 수 있으며, 수정 시 이후 연도 데이터에 즉시 반영됩니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <span>Excel 저장</span>
-              </button>
-              <button
-                onClick={downloadImage}
-                className="bg-brand-700 hover:bg-brand-800 text-white px-5 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-brand-700/30 transition-all active:scale-95 min-w-[160px]"
-              >
-                <div className="bg-white/20 p-2 rounded-xl">
-                  <Icon name="image-plus" size={20} />
+              </div>
+
+              {/* 시점 이동 컨트롤러 (표 바로 위로 이동) */}
+              <div id="timeline-controller" className="mb-10 flex flex-wrap items-center justify-center gap-4 px-2 py-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
+                <span className="text-sm font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 mr-2 bg-brand-500/10 px-5 py-2 rounded-full border border-brand-500/20">로드맵 시점 이동</span>
+                <div className="flex gap-3">
+                  {[
+                    { label: '1년 전', val: -1, icon: 'chevron-left', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' },
+                    { label: '오늘', val: 0, icon: 'refresh-cw', color: 'bg-brand-600 text-white z-10 shadow-lg shadow-brand-500/20' },
+                    { label: '1년 후', val: 1, icon: 'chevron-right', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' }
+                  ].map(btn => (
+                    <button
+                      key={btn.label}
+                      onClick={() => {
+                        takeSnapshot();
+                        if (btn.val === 0) {
+                          const todayYear = new Date().getFullYear();
+                          const diff = todayYear - startYear;
+                          setStartYear(todayYear);
+                          setStartAge(prev => prev + diff);
+                        } else {
+                          setStartYear(prev => prev + btn.val);
+                          setStartAge(prev => prev + btn.val);
+                        }
+                      }}
+                      className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-sm font-black transition-all active:scale-95 border ${btn.color} hover:border-brand-500 hover:scale-105`}
+                    >
+                      <Icon name={btn.icon} size={16} />
+                      {btn.label}
+                    </button>
+                  ))}
                 </div>
-                <span>이미지 저장</span>
-              </button>
+              </div>
+
+              {[0, 10, 20].map(startIndex => renderTable(startIndex))}
             </div>
           </div>
-
-          <div id="roadmap-container" ref={roadmapRef} className={`p-5 md:p-10 rounded-[2rem] md:rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-800/50 ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
-            <div className="mb-8 md:mb-12 pb-6 md:pb-8 border-b-2 border-slate-100 dark:border-slate-900 flex flex-wrap gap-4 md:gap-8 items-stretch justify-between">
-              <div className="flex flex-col gap-4 w-full">
-                <div className="flex flex-wrap gap-3 md:gap-6 items-stretch bg-slate-50 dark:bg-slate-900/80 p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-brand-900/30 shadow-inner w-full transition-all">
-                  <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                    <Icon name="calendar" className="text-brand-600 dark:text-brand-400" size={18} />
-                    <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">연도</span>
-                    <input type="number" value={startYear} onChange={e => setStartYear(parseInt(e.target.value) || 0)} className="w-full bg-transparent text-center font-black text-brand-600 dark:text-brand-400 text-base md:text-xl outline-none" />
-                  </div>
-                  <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                    <Icon name="user" className="text-brand-400" size={18} />
-                    <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">나이</span>
-                    <input type="number" value={startAge} onChange={e => setStartAge(parseInt(e.target.value) || 0)} className="w-full bg-transparent text-center font-black text-brand-400 text-base md:text-xl outline-none" />
-                  </div>
-                  <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                    <Icon name="trending-up" className="text-emerald-500 dark:text-emerald-400" size={18} />
-                    <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">수익률</span>
-                    <div className="flex items-center justify-center w-full">
-                      <input type="number" value={defaultReturn} onChange={e => setDefaultReturn(parseInt(e.target.value) || 0)} className="w-12 md:w-20 bg-transparent text-right font-black text-emerald-600 dark:text-emerald-400 text-base md:text-xl outline-none" />
-                      <span className="font-black text-emerald-500 dark:text-emerald-400 text-base md:text-xl ml-1">%</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                    <Icon name="wallet" className="text-brand-500" size={18} />
-                    <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">저축액</span>
-                    <input type="text" value={Number(defaultSavings).toLocaleString()} onChange={e => setDefaultSavings(Number(e.target.value.replace(/,/g, '')) || 0)} className="w-full bg-transparent text-center font-black text-brand-500 dark:text-brand-400 text-base md:text-xl outline-none" />
-                  </div>
-                  <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                    <Icon name="coins" className="text-brand-400 pulse-slow shrink-0" size={18} />
-                    <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">단위</span>
-                    <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 w-full md:w-auto">
-                      {['원', '천원', '만원'].map(u => (
-                        <button
-                          key={u}
-                          onClick={() => setSavingsUnit(u)}
-                          className={`flex-1 md:px-3 py-1.5 rounded-md font-black text-[10px] md:text-xs transition-all ${savingsUnit === u
-                            ? 'bg-brand-600 text-white shadow-md'
-                            : 'text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-slate-800 font-bold'
-                            }`}
-                        >
-                          {u}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-14 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border-2 border-brand-500/10 bg-gradient-to-r from-brand-500/5 via-transparent to-brand-500/5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block">
-                <Icon name="target" size={120} />
-              </div>
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-600 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-2xl shrink-0 transition-transform hover:scale-105 shadow-brand-900/40">목표</div>
-              <div className="flex-1 space-y-2 w-full">
-                <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
-                <textarea
-                  value={goalQuote}
-                  onChange={e => { setGoalQuote(e.target.value); handleAutoHeight(e); }}
-                  className="w-full text-lg md:text-2xl italic bg-transparent outline-none resize-none font-bold text-slate-400 dark:text-white break-keep p-2 text-center md:text-left"
-                  rows={1}
-                  onFocus={handleAutoHeight}
-                />
-              </div>
-            </div>
-
-            {/* 자산 계산 수식 및 시스템 안내 바 */}
-            <div id="formula-section" className="mb-10 space-y-4">
-              <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative overflow-hidden">
-                <div className="absolute left-0 top-0 w-2 h-full bg-brand-600"></div>
-
-                {/* 수식 영역 */}
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl border border-brand-100 dark:border-brand-800">
-                      <span className="font-black text-brand-700 dark:text-brand-300 text-base md:text-lg">연말자산</span>
-                    </div>
-                  </div>
-
-                  <span className="text-2xl font-black text-slate-300 dark:text-slate-700">=</span>
-
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">연초자산</span>
-                  </div>
-
-                  <span className="text-2xl font-black text-brand-500/40">+</span>
-
-                  <div className="flex items-center bg-slate-50 dark:bg-slate-800/50 px-5 py-3 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 gap-3">
-                    <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">투자자산</span>
-                    <span className="text-xl font-black text-slate-300">×</span>
-                    <span className="font-bold text-emerald-500 dark:text-emerald-400 text-sm md:text-base">수익률</span>
-                  </div>
-
-                  <span className="text-2xl font-black text-brand-500/40">+</span>
-
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="font-bold text-orange-500 dark:text-orange-400 text-sm md:text-base">저축액</span>
-                  </div>
-                </div>
-
-                {/* 설명 영역 (그리드) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
-                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10">
-                    <div className="bg-brand-600 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-brand-600/20">
-                      <Icon name="refresh-cw" size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">실시간 자산 연동 시스템</h4>
-                      <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
-                        올해의 <span className="text-brand-600 font-bold">연말자산</span>은 자동으로 내년도의 <span className="text-brand-600 font-bold">연초자산</span>으로 이월되어 30년 로드맵이 유기적으로 완성됩니다.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
-                    <div className="bg-emerald-500 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-emerald-500/20">
-                      <Icon name="edit-3" size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">전 항목 자유로운 수기 수정</h4>
-                      <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
-                        연초자산, 투자자산, 수익률, 저축액 등의 항목을 직접 수정할 수 있으며, 수정 시 이후 연도 데이터에 즉시 반영됩니다.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 시점 이동 컨트롤러 (표 바로 위로 이동) */}
-            <div id="timeline-controller" className="mb-10 flex flex-wrap items-center justify-center gap-4 px-2 py-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
-              <span className="text-sm font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 mr-2 bg-brand-500/10 px-5 py-2 rounded-full border border-brand-500/20">로드맵 시점 이동</span>
-              <div className="flex gap-3">
-                {[
-                  { label: '1년 전', val: -1, icon: 'chevron-left', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' },
-                  { label: '오늘', val: 0, icon: 'refresh-cw', color: 'bg-brand-600 text-white z-10 shadow-lg shadow-brand-500/20' },
-                  { label: '1년 후', val: 1, icon: 'chevron-right', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' }
-                ].map(btn => (
-                  <button
-                    key={btn.label}
-                    onClick={() => {
-                      takeSnapshot();
-                      if (btn.val === 0) {
-                        const todayYear = new Date().getFullYear();
-                        const diff = todayYear - startYear;
-                        setStartYear(todayYear);
-                        setStartAge(prev => prev + diff);
-                      } else {
-                        setStartYear(prev => prev + btn.val);
-                        setStartAge(prev => prev + btn.val);
-                      }
-                    }}
-                    className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-sm font-black transition-all active:scale-95 border ${btn.color} hover:border-brand-500 hover:scale-105`}
-                  >
-                    <Icon name={btn.icon} size={16} />
-                    {btn.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {[0, 10, 20].map(startIndex => renderTable(startIndex))}
-          </div>
-        </div>
         </div >
       );
     };
