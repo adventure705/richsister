@@ -127,27 +127,27 @@
 
     // 아이콘 컴포넌트
     const Icon = ({ name, size = 20, className = "" }) => {
-      const [svgHtml, setSvgHtml] = useState(null);
+      const ref = useRef(null);
 
       useEffect(() => {
-        if (window.lucide && window.lucide.icons) {
-          const camelName = name.replace(/-./g, x => x[1].toUpperCase());
-          const PascalName = camelName.charAt(0).toUpperCase() + camelName.slice(1);
-          const iconNode = window.lucide.icons[name] || window.lucide.icons[camelName] || window.lucide.icons[PascalName];
+        if (!window.lucide || !ref.current) return;
 
-          if (iconNode) {
-            setSvgHtml(iconNode.toSvg({
-              width: size,
-              height: size,
-              class: className,
-              "stroke-width": 2
-            }));
-          }
+        // kebab-case to PascalCase 변환 (예: cloud-download -> CloudDownload)
+        const pascalName = name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+        const iconNode = window.lucide.icons[pascalName] || window.lucide.icons[name];
+
+        if (iconNode) {
+          const svgString = iconNode.toSvg({
+            width: size,
+            height: size,
+            class: className,
+            "stroke-width": 2
+          });
+          ref.current.innerHTML = svgString;
         }
       }, [name, size, className]);
 
-      if (!svgHtml) return <span style={{ width: size, height: size }} className="inline-block bg-white/20 rounded-full"></span>;
-      return <span dangerouslySetInnerHTML={{ __html: svgHtml }} className="inline-flex items-center justify-center text-current" />;
+      return <span ref={ref} className={`inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }}></span>;
     };
 
     // 모달 컴포넌트
