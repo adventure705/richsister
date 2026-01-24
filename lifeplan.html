@@ -274,14 +274,14 @@
         let unsubscribeSnapshot = null;
         let isInitialDocLoaded = false;
 
-        const initFirebase = () => {
+        const initFirebase = async () => {
           if (window.fb) {
-            // [최적화] 리디렉션 결과 확인을 비동기로 처리하여 onAuthStateChanged의 처리를 지연시키지 않음
-            window.fb.getRedirectResult(window.fb.auth)
-              .then(result => {
-                if (result && result.user) console.log("Redirect login success:", result.user.email);
-              })
-              .catch(error => console.error("Redirect error:", error));
+            // [해결] 리디렉션 인증 결과가 완전히 올 때까지 기다려서 튕김 현상을 방지합니다.
+            try {
+              await window.fb.getRedirectResult(window.fb.auth);
+            } catch (error) {
+              console.error("Redirect result error:", error);
+            }
 
             window.fb.onAuthStateChanged(window.fb.auth, (user) => {
               setCurrentUser(user);
@@ -293,13 +293,10 @@
 
               if (user) {
                 const docRef = window.fb.doc(window.fb.db, "users", user.uid);
-                // [최적화] getDoc + onSnapshot 이중 호출을 제거하고 onSnapshot 하나로 통합
-                // 네트워크 요청 횟수를 줄이고, 캐시 연동 시 로딩 시간을 대폭 단축
                 unsubscribeSnapshot = window.fb.onSnapshot(docRef, (doc) => {
                   if (doc.exists()) {
                     applyDataToState(doc.data().roadmap);
                   } else if (!isInitialDocLoaded) {
-                    // 신규 유저(데이터 없음)인 경우만 초기화
                     resetState();
                   }
 
@@ -315,11 +312,12 @@
                   }
                 });
               } else {
+                // 사용자가 null인 경우(로그인 안 됨)에만 로딩 해제
                 setIsAuthChecking(false);
               }
             });
           } else {
-            // Firebase 로드 대기 주기를 단축 (200ms -> 50ms)
+            // Firebase 로드 대기 주기를 단축
             setTimeout(initFirebase, 50);
           }
         };
@@ -333,19 +331,16 @@
       const handleLogin = async () => {
         if (!window.fb) return;
         try {
-          // 모바일 여부 확인
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-          if (isMobile) {
-            // 모바일은 팝업 대신 리디렉션 방식 사용 (차단 방지 및 속도 개선)
+          // [개선] 모바일에서도 가급적 팝업을 먼저 시도하여 페이지 새로고침(튕김)을 방지합니다.
+          // 브라우저가 팝업을 차단할 경우에만 리디렉션 방식으로 자동 전환합니다.
+          await window.fb.signInWithPopup(window.fb.auth, window.fb.provider);
+        } catch (error) {
+          if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
             await window.fb.signInWithRedirect(window.fb.auth, window.fb.provider);
           } else {
-            // PC는 기존처럼 팝업 사용
-            await window.fb.signInWithPopup(window.fb.auth, window.fb.provider);
+            console.error("Login failed", error);
+            setModalState({ type: 'status', data: { title: "로그인 실패", msg: error.message, icon: "alert-triangle" } });
           }
-        } catch (error) {
-          console.error("Login failed", error);
-          setModalState({ type: 'status', data: { title: "로그인 실패", msg: error.message, icon: "alert-triangle" } });
         }
       };
 
