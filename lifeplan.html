@@ -1602,9 +1602,16 @@
           >
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               {allRows.map((row, idx) => (
-                <div key={row.id} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group">
+                <div
+                  key={row.id}
+                  draggable={true}
+                  onDragStart={(e) => onDragStart(e, idx)}
+                  onDragOver={onDragOver}
+                  onDrop={(e) => onDrop(e, idx)}
+                  className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group cursor-move hover:border-brand-500/30 transition-all"
+                >
                   <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold shrink-0">
-                    {idx + 1}
+                    <Icon name="grip-vertical" size={14} className="opacity-40" />
                   </div>
                   <div className="flex-1">
                     <input
