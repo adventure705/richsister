@@ -1089,714 +1089,715 @@
               >
                 <div style={{ width: '1400px', height: '1px' }}></div>
               </div>
+            </div>
 
-              <div
-                id={`table-container-${startIndex}`}
-                onScroll={(e) => {
-                  const top = document.getElementById(`top-scroll-${startIndex}`);
-                  if (top) top.scrollLeft = e.target.scrollLeft;
-                }}
-                className="overflow-x-auto custom-scrollbar pb-2"
-              >
-                <table className={`w-full border-collapse border border-slate-200 dark:border-brand-900/30 text-[11px] table-fixed min-w-[1400px]`}>
-                  <thead>
-                    <tr className={`${headerBg} text-white shadow-lg relative`}>
-                      <th className={`border border-white/10 p-4 w-44 text-sm font-black uppercase tracking-tighter relative group/header`}>
-                        구분
-                        <div
-                          onMouseDown={startResizing}
-                          className="absolute bottom-0 left-0 w-full h-1.5 cursor-row-resize bg-white/20 hover:bg-white/40 opacity-0 group-hover/header:opacity-100 transition-opacity z-10"
-                          title="드래그하여 행 높이 조절"
-                        ></div>
+            <div
+              id={`table-container-${startIndex}`}
+              onScroll={(e) => {
+                const top = document.getElementById(`top-scroll-${startIndex}`);
+                if (top) top.scrollLeft = e.target.scrollLeft;
+              }}
+              className="overflow-x-auto custom-scrollbar pb-2"
+            >
+              <table className={`w-full border-collapse border border-slate-200 dark:border-brand-900/30 text-[11px] table-fixed min-w-[1400px]`}>
+                <thead>
+                  <tr className={`${headerBg} text-white shadow-lg relative`}>
+                    <th className={`border border-white/10 p-4 w-44 text-sm font-black uppercase tracking-tighter relative group/header`}>
+                      구분
+                      <div
+                        onMouseDown={startResizing}
+                        className="absolute bottom-0 left-0 w-full h-1.5 cursor-row-resize bg-white/20 hover:bg-white/40 opacity-0 group-hover/header:opacity-100 transition-opacity z-10"
+                        title="드래그하여 행 높이 조절"
+                      ></div>
+                    </th>
+                    {chunk.map((_, i) => (
+                      <th key={i} className={`border border-white/10 p-2 text-center`}>
+                        <div className="text-xl font-black">{startYear + startIndex + i}년</div>
+                        <div className="text-xs opacity-80 font-bold uppercase">{startAge + startIndex + i}세</div>
                       </th>
-                      {chunk.map((_, i) => (
-                        <th key={i} className={`border border-white/10 p-2 text-center`}>
-                          <div className="text-xl font-black">{startYear + startIndex + i}년</div>
-                          <div className="text-xs opacity-80 font-bold uppercase">{startAge + startIndex + i}세</div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allRows.map((row, rowIndex) => {
-                      const isYearEnd = row.id === 'yearEndAssets';
-                      const rowBg = isYearEnd ? (darkMode ? 'bg-brand-900/40' : 'bg-brand-50') : 'transition-colors hover:bg-slate-500/5';
-                      const textColor = isYearEnd ? (darkMode ? 'text-brand-300' : 'text-brand-700 font-black') : 'text-slate-700 dark:text-slate-200';
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allRows.map((row, rowIndex) => {
+                    const isYearEnd = row.id === 'yearEndAssets';
+                    const rowBg = isYearEnd ? (darkMode ? 'bg-brand-900/40' : 'bg-brand-50') : 'transition-colors hover:bg-slate-500/5';
+                    const textColor = isYearEnd ? (darkMode ? 'text-brand-300' : 'text-brand-700 font-black') : 'text-slate-700 dark:text-slate-200';
 
-                      return (
-                        <tr
-                          key={row.id}
-                          draggable
-                          onDragStart={(e) => onDragStart(e, rowIndex)}
-                          onDragOver={onDragOver}
-                          onDrop={(e) => onDrop(e, rowIndex)}
-                          className={`${rowBg} cursor-move`}
-                          style={{ height: `${row.isSystem ? Math.max(40, globalRowHeight * 0.5) : globalRowHeight}px` }}
-                        >
-                          <td className={`${rowHeaderBg} border ${borderColor} p-3 font-black text-center text-sm relative group align-middle overflow-hidden`}>
-                            <div className={`flex flex-col items-center justify-center gap-2 h-full relative`}>
-                              <div className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-300 opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                <Icon name="grip-vertical" size={16} />
-                              </div>
-
-                              <div className="flex items-center justify-center gap-2">
-                                {row.operator === 'add' && <span className="bg-emerald-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">+</span>}
-                                {row.operator === 'subtract' && <span className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">-</span>}
-                                <input
-                                  value={row.label}
-                                  onChange={(e) => updateRowLabel(row.id, e.target.value)}
-                                  onClick={(e) => e.stopPropagation()}
-                                  spellCheck="false"
-                                  className="w-full bg-transparent text-center outline-none border-b border-transparent focus:border-brand-500 transition-all pb-1 break-all leading-tight cursor-text text-slate-800 dark:text-slate-100 z-10"
-                                />
-                              </div>
+                    return (
+                      <tr
+                        key={row.id}
+                        draggable
+                        onDragStart={(e) => onDragStart(e, rowIndex)}
+                        onDragOver={onDragOver}
+                        onDrop={(e) => onDrop(e, rowIndex)}
+                        className={`${rowBg} cursor-move`}
+                        style={{ height: `${row.isSystem ? Math.max(40, globalRowHeight * 0.5) : globalRowHeight}px` }}
+                      >
+                        <td className={`${rowHeaderBg} border ${borderColor} p-3 font-black text-center text-sm relative group align-middle overflow-hidden`}>
+                          <div className={`flex flex-col items-center justify-center gap-2 h-full relative`}>
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-300 opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              <Icon name="grip-vertical" size={16} />
                             </div>
-                          </td>
-                          {chunk.map((item, i) => {
-                            const globalIdx = startIndex + i;
-                            let content;
 
-                            if (row.id === 'yearEndAssets') {
-                              content = (
-                                <div className="p-2 text-right font-black text-[15px]">
-                                  {calculateYearEndAssets(item).toLocaleString()}
-                                </div>
-                              );
-                            } else if (row.id === 'profit') {
-                              content = (
-                                <div className="p-2 text-right font-black text-[15px] text-emerald-600 dark:text-emerald-400">
-                                  {calculateProfit(item).toLocaleString()}
-                                </div>
-                              );
-                            } else if (row.type === 'number' || row.id === 'beginningAssets' || row.id === 'savings') {
-                              const val = row.isSystem ? item[row.id] : item.dynamicData?.[row.id];
-                              content = (
+                            <div className="flex items-center justify-center gap-2">
+                              {row.operator === 'add' && <span className="bg-emerald-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">+</span>}
+                              {row.operator === 'subtract' && <span className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">-</span>}
+                              <input
+                                value={row.label}
+                                onChange={(e) => updateRowLabel(row.id, e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                spellCheck="false"
+                                className="w-full bg-transparent text-center outline-none border-b border-transparent focus:border-brand-500 transition-all pb-1 break-all leading-tight cursor-text text-slate-800 dark:text-slate-100 z-10"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        {chunk.map((item, i) => {
+                          const globalIdx = startIndex + i;
+                          let content;
+
+                          if (row.id === 'yearEndAssets') {
+                            content = (
+                              <div className="p-2 text-right font-black text-[15px]">
+                                {calculateYearEndAssets(item).toLocaleString()}
+                              </div>
+                            );
+                          } else if (row.id === 'profit') {
+                            content = (
+                              <div className="p-2 text-right font-black text-[15px] text-emerald-600 dark:text-emerald-400">
+                                {calculateProfit(item).toLocaleString()}
+                              </div>
+                            );
+                          } else if (row.type === 'number' || row.id === 'beginningAssets' || row.id === 'savings') {
+                            const val = row.isSystem ? item[row.id] : item.dynamicData?.[row.id];
+                            content = (
+                              <input
+                                type="text"
+                                value={row.isSystem ? (Number(val) === 0 ? "" : Number(val).toLocaleString()) : (item.dynamicData?.[row.id] || "")}
+                                onChange={(e) => {
+                                  const cleaned = e.target.value.replace(/,/g, '').replace(/[^0-9.\-]/g, '');
+                                  row.isSystem
+                                    ? updateItem(globalIdx, row.id, cleaned)
+                                    : updateDynamicData(globalIdx, row.id, cleaned);
+                                }}
+                                spellCheck="false"
+                                className={`w-full text-right p-1 bg-transparent pr-3 outline-none font-black text-[15px] ${row.id === 'savings' ? 'text-orange-500 dark:text-orange-400' :
+                                  row.operator === 'add' ? 'text-emerald-600 dark:text-emerald-400' :
+                                    row.operator === 'subtract' ? 'text-red-500 dark:text-red-400' :
+                                      'text-slate-700 dark:text-white'
+                                  }`}
+                              />
+                            );
+                          } else if (row.id === 'targetReturn') {
+                            content = (
+                              <div className="flex items-center justify-end w-full px-2 group/input">
                                 <input
                                   type="text"
-                                  value={row.isSystem ? (Number(val) === 0 ? "" : Number(val).toLocaleString()) : (item.dynamicData?.[row.id] || "")}
+                                  value={item.targetReturn}
                                   onChange={(e) => {
-                                    const cleaned = e.target.value.replace(/,/g, '').replace(/[^0-9.\-]/g, '');
-                                    row.isSystem
-                                      ? updateItem(globalIdx, row.id, cleaned)
-                                      : updateDynamicData(globalIdx, row.id, cleaned);
+                                    const cleaned = e.target.value.replace(/[^0-9.]/g, '');
+                                    updateItem(globalIdx, 'targetReturn', cleaned);
                                   }}
                                   spellCheck="false"
-                                  className={`w-full text-right p-1 bg-transparent pr-3 outline-none font-black text-[15px] ${row.id === 'savings' ? 'text-orange-500 dark:text-orange-400' :
-                                    row.operator === 'add' ? 'text-emerald-600 dark:text-emerald-400' :
-                                      row.operator === 'subtract' ? 'text-red-500 dark:text-red-400' :
-                                        'text-slate-700 dark:text-white'
-                                    }`}
+                                  className="w-12 text-right p-1 font-black bg-transparent outline-none text-emerald-500 dark:text-emerald-400 text-[15px]"
                                 />
-                              );
-                            } else if (row.id === 'targetReturn') {
-                              content = (
-                                <div className="flex items-center justify-end w-full px-2 group/input">
-                                  <input
-                                    type="text"
-                                    value={item.targetReturn}
-                                    onChange={(e) => {
-                                      const cleaned = e.target.value.replace(/[^0-9.]/g, '');
-                                      updateItem(globalIdx, 'targetReturn', cleaned);
-                                    }}
-                                    spellCheck="false"
-                                    className="w-12 text-right p-1 font-black bg-transparent outline-none text-emerald-500 dark:text-emerald-400 text-[15px]"
-                                  />
-                                  <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-[15px] leading-none">%</span>
-                                </div>
-                              );
-                            } else if (row.type === 'image') {
-                              const cellData = item.dynamicData?.[row.id];
-                              content = (
-                                <div
-                                  onClick={() => cellData ? setModalState({ type: 'previewImage', data: cellData }) : triggerFileInput(globalIdx, row.id)}
-                                  className={`w-full min-h-[90px] relative group border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${cellData ? 'border-transparent' : (darkMode ? 'border-slate-700 hover:border-slate-500 bg-slate-900 shadow-inner' : 'border-slate-200 hover:border-slate-300 bg-slate-50')}`}
-                                >
-                                  {cellData ? (
-                                    <>
-                                      <img src={cellData} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                                        <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-black border border-white/30">클릭 확대</div>
-                                        <button onClick={(e) => { e.stopPropagation(); removeImage(e, globalIdx, row.id); }} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black mt-2">삭제</button>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="img-placeholder flex flex-col items-center justify-center">
-                                      <Icon name="plus" size={14} className="text-slate-300 mb-1" />
-                                      <span className="text-[10px] font-bold text-slate-400">이미지 추가</span>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            } else {
-                              const cellData = item.dynamicData?.[row.id] || "";
-                              content = (
-                                <textarea
-                                  value={cellData}
-                                  onChange={(e) => { updateDynamicData(globalIdx, row.id, e.target.value); handleAutoHeight(e); }}
-                                  placeholder="입력..."
-                                  spellCheck="false"
-                                  className="w-full min-h-[100px] p-3 text-[12px] bg-transparent resize-none outline-none overflow-hidden font-medium leading-relaxed scrollbar-hide focus:bg-brand-500/5 dark:focus:bg-brand-500/10 rounded-xl transition-all text-slate-700 dark:text-white"
-                                />
-                              );
-                            }
-
-                            return (
-                              <td key={i} className={`border ${borderColor} p-1 align-middle`}>
-                                {content}
-                              </td>
+                                <span className="text-emerald-500 dark:text-emerald-400 font-extrabold text-[15px] leading-none">%</span>
+                              </div>
                             );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                          } else if (row.type === 'image') {
+                            const cellData = item.dynamicData?.[row.id];
+                            content = (
+                              <div
+                                onClick={() => cellData ? setModalState({ type: 'previewImage', data: cellData }) : triggerFileInput(globalIdx, row.id)}
+                                className={`w-full min-h-[90px] relative group border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${cellData ? 'border-transparent' : (darkMode ? 'border-slate-700 hover:border-slate-500 bg-slate-900 shadow-inner' : 'border-slate-200 hover:border-slate-300 bg-slate-50')}`}
+                              >
+                                {cellData ? (
+                                  <>
+                                    <img src={cellData} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                      <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-black border border-white/30">클릭 확대</div>
+                                      <button onClick={(e) => { e.stopPropagation(); removeImage(e, globalIdx, row.id); }} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black mt-2">삭제</button>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div className="img-placeholder flex flex-col items-center justify-center">
+                                    <Icon name="plus" size={14} className="text-slate-300 mb-1" />
+                                    <span className="text-[10px] font-bold text-slate-400">이미지 추가</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          } else {
+                            const cellData = item.dynamicData?.[row.id] || "";
+                            content = (
+                              <textarea
+                                value={cellData}
+                                onChange={(e) => { updateDynamicData(globalIdx, row.id, e.target.value); handleAutoHeight(e); }}
+                                placeholder="입력..."
+                                spellCheck="false"
+                                className="w-full min-h-[100px] p-3 text-[12px] bg-transparent resize-none outline-none overflow-hidden font-medium leading-relaxed scrollbar-hide focus:bg-brand-500/5 dark:focus:bg-brand-500/10 rounded-xl transition-all text-slate-700 dark:text-white"
+                              />
+                            );
+                          }
+
+                          return (
+                            <td key={i} className={`border ${borderColor} p-1 align-middle`}>
+                              {content}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            );
+          </div>
+        );
       };
 
-            return (
-            <div className={`min-h-screen transition-all ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'NanumSquare, sans-serif' }}>
-              <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+      return (
+        <div className={`min-h-screen transition-all ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'NanumSquare, sans-serif' }}>
+          <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
 
-              {/* 모달: 제목 편집 */}
-              <Modal
-                isOpen={modalState?.type === 'header'}
-                onClose={closeModal}
-                title="문서 제목 및 안내 수정"
-              >
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">메인 제목</label>
-                    <input
-                      type="text"
-                      className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
-                      value={pageTitle}
-                      onChange={e => setPageTitle(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">서브 안내 문구</label>
-                    <textarea
-                      className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-bold outline-none focus:ring-2 focus:ring-brand-500 min-h-[100px] text-slate-700 dark:text-slate-200"
-                      value={pageSubtitle}
-                      onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
-                    />
-                  </div>
-                  <button onClick={closeModal} className="w-full py-4 bg-brand text-white rounded-2xl font-black text-lg shadow-xl shadow-brand/20 hover:scale-[1.02] transition-transform">저장하기</button>
+          {/* 모달: 제목 편집 */}
+          <Modal
+            isOpen={modalState?.type === 'header'}
+            onClose={closeModal}
+            title="문서 제목 및 안내 수정"
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">메인 제목</label>
+                <input
+                  type="text"
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
+                  value={pageTitle}
+                  onChange={e => setPageTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">서브 안내 문구</label>
+                <textarea
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-bold outline-none focus:ring-2 focus:ring-brand-500 min-h-[100px] text-slate-700 dark:text-slate-200"
+                  value={pageSubtitle}
+                  onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
+                />
+              </div>
+              <button onClick={closeModal} className="w-full py-4 bg-brand text-white rounded-2xl font-black text-lg shadow-xl shadow-brand/20 hover:scale-[1.02] transition-transform">저장하기</button>
+            </div>
+          </Modal>
+
+          {/* 모달: 행 추가/수정 */}
+          <Modal
+            isOpen={modalState?.type === 'addRow' || modalState?.type === 'editRow'}
+            onClose={closeModal}
+            title={modalState?.type === 'addRow' ? '새로운 행 추가' : '행 정보 수정'}
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">행 이름 (라벨)</label>
+                <input
+                  id="row-label-input"
+                  type="text"
+                  spellCheck="false"
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
+                  defaultValue={modalState?.data?.label || ''}
+                  placeholder="예: 라이프 플랜, 자기 개발"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 타입</label>
+                <div className="grid grid-cols-3 gap-3">
+                  <button id="type-text" onClick={(e) => {
+                    document.getElementById('type-text').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    window._selectedType = 'textarea';
+                    document.getElementById('operator-section').classList.add('hidden');
+                  }} className={`py-4 rounded-2xl border font-black transition-all ${(!modalState?.data || modalState?.data?.type === 'textarea') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>텍스트</button>
+                  <button id="type-number" onClick={(e) => {
+                    document.getElementById('type-number').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    window._selectedType = 'number';
+                    document.getElementById('operator-section').classList.remove('hidden');
+                  }} className={`py-4 rounded-2xl border font-black transition-all ${(modalState?.data?.type === 'number') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>숫자</button>
+                  <button id="type-image" onClick={(e) => {
+                    document.getElementById('type-image').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    window._selectedType = 'image';
+                    document.getElementById('operator-section').classList.add('hidden');
+                  }} className={`py-4 rounded-2xl border font-black transition-all ${(modalState?.data?.type === 'image') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>이미지</button>
                 </div>
-              </Modal>
 
-              {/* 모달: 행 추가/수정 */}
-              <Modal
-                isOpen={modalState?.type === 'addRow' || modalState?.type === 'editRow'}
-                onClose={closeModal}
-                title={modalState?.type === 'addRow' ? '새로운 행 추가' : '행 정보 수정'}
+                <div id="operator-section" className={modalState?.data?.type === 'number' || window._selectedType === 'number' ? "" : "hidden"}>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 mt-4">데이터 연산 (연말자산 반영)</label>
+                  <select id="row-operator-select" defaultValue={modalState?.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 mb-4">
+                    <option value="">연산 없음 (그냥 기록)</option>
+                    <option value="add">자산에 합산 (+)</option>
+                    <option value="subtract">자산에서 차감 (-)</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const label = document.getElementById('row-label-input').value;
+                  if (!label) return alert('행 이름을 입력해주세요.');
+                  const type = window._selectedType || 'textarea';
+                  const operator = document.getElementById('row-operator-select')?.value || "";
+
+                  if (modalState?.type === 'addRow') {
+                    addRow(label, type, operator);
+                  } else {
+                    updateRowInfo(modalState?.data?.id, label, type, operator);
+                  }
+                  closeModal();
+                }}
+                className="w-full py-5 bg-brand-600 text-white rounded-2xl font-black text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
               >
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">행 이름 (라벨)</label>
-                    <input
-                      id="row-label-input"
-                      type="text"
-                      spellCheck="false"
-                      className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100"
-                      defaultValue={modalState?.data?.label || ''}
-                      placeholder="예: 라이프 플랜, 자기 개발"
-                    />
+                {modalState?.type === 'addRow' ? '생성하기' : '수정 완료'}
+              </button>
+            </div>
+          </Modal>
+
+          {/* 모달: 행 관리 */}
+          <Modal
+            isOpen={modalState?.type === 'manageRows'}
+            onClose={closeModal}
+            title="행 관리 및 이름 수정"
+            maxWidth="max-w-xl"
+          >
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+              {allRows.map((row, idx) => (
+                <div
+                  key={row.id}
+                  draggable={true}
+                  onDragStart={(e) => onDragStart(e, idx)}
+                  onDragOver={onDragOver}
+                  onDrop={(e) => onDrop(e, idx)}
+                  className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group cursor-move hover:border-brand-500/30 transition-all"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold shrink-0">
+                    <Icon name="grip-vertical" size={14} className="opacity-40" />
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">데이터 타입</label>
-                    <div className="grid grid-cols-3 gap-3">
-                      <button id="type-text" onClick={(e) => {
-                        document.getElementById('type-text').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
-                        document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                        document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                        window._selectedType = 'textarea';
-                        document.getElementById('operator-section').classList.add('hidden');
-                      }} className={`py-4 rounded-2xl border font-black transition-all ${(!modalState?.data || modalState?.data?.type === 'textarea') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>텍스트</button>
-                      <button id="type-number" onClick={(e) => {
-                        document.getElementById('type-number').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
-                        document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                        document.getElementById('type-image').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                        window._selectedType = 'number';
-                        document.getElementById('operator-section').classList.remove('hidden');
-                      }} className={`py-4 rounded-2xl border font-black transition-all ${(modalState?.data?.type === 'number') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>숫자</button>
-                      <button id="type-image" onClick={(e) => {
-                        document.getElementById('type-image').classList.add('bg-brand-600', 'text-white', 'border-brand-600');
-                        document.getElementById('type-text').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                        document.getElementById('type-number').classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
-                        window._selectedType = 'image';
-                        document.getElementById('operator-section').classList.add('hidden');
-                      }} className={`py-4 rounded-2xl border font-black transition-all ${(modalState?.data?.type === 'image') ? 'bg-brand-600 text-white border-brand-600' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>이미지</button>
-                    </div>
-
-                    <div id="operator-section" className={modalState?.data?.type === 'number' || window._selectedType === 'number' ? "" : "hidden"}>
-                      <label className="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 mt-4">데이터 연산 (연말자산 반영)</label>
-                      <select id="row-operator-select" defaultValue={modalState?.data?.operator || ""} className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-black text-lg outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 mb-4">
-                        <option value="">연산 없음 (그냥 기록)</option>
-                        <option value="add">자산에 합산 (+)</option>
-                        <option value="subtract">자산에서 차감 (-)</option>
-                      </select>
+                  <div className="flex-1">
+                    <input
+                      value={row.label}
+                      onChange={(e) => updateRowLabel(row.id, e.target.value)}
+                      className="w-full bg-transparent font-black text-slate-800 dark:text-white outline-none border-b border-transparent focus:border-brand-500 transition-all"
+                      placeholder="행 이름 입력..."
+                    />
+                    <div className="text-[10px] text-slate-400 font-bold mt-1">
+                      Type: {row.isSystem ? '시스템 기본' : (row.type === 'textarea' ? '텍스트' : row.type === 'number' ? '숫자' : '이미지')}
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      const label = document.getElementById('row-label-input').value;
-                      if (!label) return alert('행 이름을 입력해주세요.');
-                      const type = window._selectedType || 'textarea';
-                      const operator = document.getElementById('row-operator-select')?.value || "";
-
-                      if (modalState?.type === 'addRow') {
-                        addRow(label, type, operator);
-                      } else {
-                        updateRowInfo(modalState?.data?.id, label, type, operator);
-                      }
-                      closeModal();
-                    }}
-                    className="w-full py-5 bg-brand-600 text-white rounded-2xl font-black text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                    onClick={() => deleteRow(row.id)}
+                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-xl transition-all"
+                    title="이 행 삭제"
                   >
-                    {modalState?.type === 'addRow' ? '생성하기' : '수정 완료'}
+                    <Icon name="trash-2" size={18} />
                   </button>
                 </div>
-              </Modal>
-
-              {/* 모달: 행 관리 */}
-              <Modal
-                isOpen={modalState?.type === 'manageRows'}
-                onClose={closeModal}
-                title="행 관리 및 이름 수정"
-                maxWidth="max-w-xl"
+              ))}
+            </div>
+            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={closeModal}
+                className="w-full py-4 bg-brand-600 text-white rounded-2xl font-black text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
               >
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  {allRows.map((row, idx) => (
-                    <div
-                      key={row.id}
-                      draggable={true}
-                      onDragStart={(e) => onDragStart(e, idx)}
-                      onDragOver={onDragOver}
-                      onDrop={(e) => onDrop(e, idx)}
-                      className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group cursor-move hover:border-brand-500/30 transition-all"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-bold shrink-0">
-                        <Icon name="grip-vertical" size={14} className="opacity-40" />
+                닫기
+              </button>
+            </div>
+          </Modal>
+
+          {/* 모달: 삭제 확인 */}
+          <Modal
+            isOpen={modalState?.type === 'confirmDelete'}
+            onClose={closeModal}
+            title="삭제 확인"
+          >
+            <div className="space-y-6 text-center py-4">
+              <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-500 mb-4 animate-bounce">
+                <Icon name="alert-triangle" size={40} />
+              </div>
+              <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
+                {modalState?.data?.msg}
+              </p>
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={executeDelete}
+                  className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-red-500/20 hover:scale-[1.02] transition-all"
+                >
+                  삭제하기
+                </button>
+              </div>
+            </div>
+          </Modal>
+
+          {/* 모달: 이미지 확대 */}
+          <Modal
+            isOpen={modalState?.type === 'previewImage'}
+            onClose={closeModal}
+            title="이미지 크게 보기"
+            maxWidth="max-w-4xl"
+          >
+            <div className="p-2">
+              <img src={modalState?.data} className="w-full rounded-2xl shadow-2xl" />
+            </div>
+          </Modal>
+
+          {/* 모달: 상태 알림 (Alert 대체) */}
+          <Modal
+            isOpen={modalState?.type === 'status'}
+            onClose={closeModal}
+            title={modalState?.data?.title || "알림"}
+          >
+            <div className="space-y-6 text-center py-6">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState?.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
+                modalState?.data?.icon === 'alert-triangle' || modalState?.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
+                  'bg-brand-100 text-brand-500'
+                }`}>
+                <Icon name={modalState?.data?.icon || "info"} size={40} className={modalState?.data?.animate ? "animate-spin" : ""} />
+              </div>
+              <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
+                {modalState?.data?.msg}
+              </p>
+              <button
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && closeModal()}
+                onClick={closeModal}
+                className="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white rounded-2xl font-black text-lg shadow-xl shadow-brand-900/30 transition-all transform active:scale-[0.98]"
+              >
+                확인
+              </button>
+            </div>
+          </Modal>
+
+          {/* 모달: 저장 기록 (히스토리) */}
+          <Modal
+            isOpen={modalState?.type === 'history'}
+            onClose={closeModal}
+            title="데이터 저장 기록 (최대 100개)"
+            maxWidth="max-w-2xl"
+          >
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-hide">
+              {history.length === 0 ? (
+                <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <Icon name="database-zap" size={48} className="mx-auto text-slate-300 mb-4" />
+                  <p className="text-slate-500 font-bold">저장된 기록이 없습니다.<br />데이터 수정 시 5분마다 자동 저장됩니다.</p>
+                </div>
+              ) : (
+                history.map((backup) => (
+                  <div key={backup.id} className="group flex items-center justify-between p-5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-brand-500/50 hover:bg-brand-50/30 dark:hover:bg-brand-900/10 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${backup.isAuto ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-brand-100 dark:bg-brand-900 text-brand-500'}`}>
+                        <Icon name={backup.isAuto ? "cpu" : "save"} size={20} />
                       </div>
-                      <div className="flex-1">
-                        <input
-                          value={row.label}
-                          onChange={(e) => updateRowLabel(row.id, e.target.value)}
-                          className="w-full bg-transparent font-black text-slate-800 dark:text-white outline-none border-b border-transparent focus:border-brand-500 transition-all"
-                          placeholder="행 이름 입력..."
-                        />
-                        <div className="text-[10px] text-slate-400 font-bold mt-1">
-                          Type: {row.isSystem ? '시스템 기본' : (row.type === 'textarea' ? '텍스트' : row.type === 'number' ? '숫자' : '이미지')}
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-black text-slate-800 dark:text-white">{backup.timestamp}</span>
+                          {backup.isAuto && <span className="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs px-2 py-0.5 rounded-full font-bold">자동백업</span>}
                         </div>
+                        <p className="text-xs text-slate-400 font-medium">데이터 스냅샷 {backup.id}</p>
                       </div>
-                      <button
-                        onClick={() => deleteRow(row.id)}
-                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-xl transition-all"
-                        title="이 행 삭제"
-                      >
-                        <Icon name="trash-2" size={18} />
-                      </button>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    onClick={closeModal}
-                    className="w-full py-4 bg-brand-600 text-white rounded-2xl font-black text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
-                  >
-                    닫기
-                  </button>
-                </div>
-              </Modal>
-
-              {/* 모달: 삭제 확인 */}
-              <Modal
-                isOpen={modalState?.type === 'confirmDelete'}
-                onClose={closeModal}
-                title="삭제 확인"
-              >
-                <div className="space-y-6 text-center py-4">
-                  <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-500 mb-4 animate-bounce">
-                    <Icon name="alert-triangle" size={40} />
-                  </div>
-                  <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
-                    {modalState?.data?.msg}
-                  </p>
-                  <div className="flex gap-4 pt-4">
                     <button
-                      onClick={closeModal}
-                      className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                      onClick={() => restoreBackup(backup)}
+                      className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-black text-slate-700 dark:text-slate-200 hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-all"
                     >
-                      취소
-                    </button>
-                    <button
-                      onClick={executeDelete}
-                      className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-red-500/20 hover:scale-[1.02] transition-all"
-                    >
-                      삭제하기
+                      복구하기
                     </button>
                   </div>
-                </div>
-              </Modal>
+                ))
+              )}
+            </div>
+            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs text-slate-400 font-bold">
+              <p>💾 Ctrl + S 단축키로 즉시 저장이 가능합니다.</p>
+              <button onClick={() => { if (confirm('모든 기록을 삭제하시겠습니까?')) { setHistory([]); localStorage.removeItem('roadmap_history'); } }} className="text-red-400 hover:text-red-600 transition-colors">전체 기록 삭제</button>
+            </div>
+          </Modal>
 
-              {/* 모달: 이미지 확대 */}
-              <Modal
-                isOpen={modalState?.type === 'previewImage'}
-                onClose={closeModal}
-                title="이미지 크게 보기"
-                maxWidth="max-w-4xl"
-              >
-                <div className="p-2">
-                  <img src={modalState?.data} className="w-full rounded-2xl shadow-2xl" />
-                </div>
-              </Modal>
+          <div className="max-w-[1750px] mx-auto p-4 md:p-8">
+            <div className={`flex flex-col justify-center items-center mb-6 md:mb-10 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl border-t-[8px] border-brand-600 gap-8 transition-all relative overflow-hidden ${darkMode ? 'bg-slate-900 shadow-brand-950/20' : 'bg-white'}`}>
+              {/* Book Icon Removed */}
 
-              {/* 모달: 상태 알림 (Alert 대체) */}
-              <Modal
-                isOpen={modalState?.type === 'status'}
-                onClose={closeModal}
-                title={modalState?.data?.title || "알림"}
-              >
-                <div className="space-y-6 text-center py-6">
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${modalState?.data?.icon === 'check-circle' ? 'bg-emerald-100 text-emerald-500' :
-                    modalState?.data?.icon === 'alert-triangle' || modalState?.data?.icon === 'alert-circle' ? 'bg-red-100 text-red-500' :
-                      'bg-brand-100 text-brand-500'
-                    }`}>
-                    <Icon name={modalState?.data?.icon || "info"} size={40} className={modalState?.data?.animate ? "animate-spin" : ""} />
-                  </div>
-                  <p className="text-slate-700 dark:text-slate-200 font-bold text-lg whitespace-pre-wrap leading-relaxed">
-                    {modalState?.data?.msg}
-                  </p>
+              <div className="flex flex-col items-center justify-center w-full text-center mt-6 md:mt-0 relative z-10">
+                <input
+                  value={pageTitle}
+                  onChange={e => setPageTitle(e.target.value)}
+                  spellCheck="false"
+                  className="w-full text-3xl md:text-5xl font-black mb-2 tracking-tighter leading-tight text-slate-800 dark:text-white bg-transparent outline-none text-center"
+                />
+                <textarea
+                  value={pageSubtitle}
+                  onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
+                  spellCheck="false"
+                  className="w-full text-slate-500 font-bold text-sm md:text-lg dark:text-gray-300 break-keep bg-transparent outline-none resize-none text-center overflow-hidden"
+                  rows={1}
+                  onFocus={handleAutoHeight}
+                />
+              </div>
+
+              <div className="flex flex-col gap-3 w-full max-w-5xl mx-auto mt-8">
+                {/* Row 1: Main Actions + Auth (Gradient descending from #af1d42) */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
-                    autoFocus
-                    onKeyDown={(e) => e.key === 'Enter' && closeModal()}
-                    onClick={closeModal}
-                    className="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white rounded-2xl font-black text-lg shadow-xl shadow-brand-900/30 transition-all transform active:scale-[0.98]"
+                    onClick={createBackup}
+                    className="bg-[#af1d42] hover:bg-[#911836] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
                   >
-                    확인
+                    <Icon name="save" size={18} />
+                    <span>저장하기</span>
+                  </button>
+                  <button
+                    onClick={downloadExcel}
+                    className="bg-[#ba2d4e] hover:bg-[#9c2540] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="table-2" size={18} />
+                    <span>Excel 다운로드</span>
+                  </button>
+                  <button
+                    onClick={downloadImage}
+                    className="bg-[#c53d5a] hover:bg-[#a7334b] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="image-plus" size={18} />
+                    <span>이미지 다운로드</span>
                   </button>
                 </div>
-              </Modal>
 
-              {/* 모달: 저장 기록 (히스토리) */}
-              <Modal
-                isOpen={modalState?.type === 'history'}
-                onClose={closeModal}
-                title="데이터 저장 기록 (최대 100개)"
-                maxWidth="max-w-2xl"
-              >
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-hide">
-                  {history.length === 0 ? (
-                    <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                      <Icon name="database-zap" size={48} className="mx-auto text-slate-300 mb-4" />
-                      <p className="text-slate-500 font-bold">저장된 기록이 없습니다.<br />데이터 수정 시 5분마다 자동 저장됩니다.</p>
-                    </div>
-                  ) : (
-                    history.map((backup) => (
-                      <div key={backup.id} className="group flex items-center justify-between p-5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-brand-500/50 hover:bg-brand-50/30 dark:hover:bg-brand-900/10 transition-all">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${backup.isAuto ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-brand-100 dark:bg-brand-900 text-brand-500'}`}>
-                            <Icon name={backup.isAuto ? "cpu" : "save"} size={20} />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-black text-slate-800 dark:text-white">{backup.timestamp}</span>
-                              {backup.isAuto && <span className="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs px-2 py-0.5 rounded-full font-bold">자동백업</span>}
-                            </div>
-                            <p className="text-xs text-slate-400 font-medium">데이터 스냅샷 {backup.id}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => restoreBackup(backup)}
-                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-black text-slate-700 dark:text-slate-200 hover:bg-brand-500 hover:text-white hover:border-brand-500 transition-all"
-                        >
-                          복구하기
-                        </button>
-                      </div>
-                    ))
-                  )}
+                {/* Row 2: Edit & View Actions (Lighter shades) */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
+                    className="bg-[#e46d7e] hover:bg-[#c65d6c] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="layers" size={18} />
+                    <span>행 추가</span>
+                  </button>
+                  <button
+                    onClick={() => setModalState({ type: 'manageRows' })}
+                    className="bg-[#ea7584] hover:bg-[#cc6673] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="edit-3" size={18} />
+                    <span>행 관리</span>
+                  </button>
+                  <button
+                    onClick={() => setModalState({ type: 'history' })}
+                    className="bg-[#ef7d8a] hover:bg-[#d16d78] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
+                  >
+                    <Icon name="history" size={18} />
+                    <span>백업 기록 관리</span>
+                  </button>
+                  <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="bg-[#f98d96] hover:bg-[#df7d85] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl flex-1 min-w-[110px]"
+                  >
+                    {darkMode ? <Icon name="sun" size={18} className="text-yellow-200" /> : <Icon name="moon" size={18} />}
+                    <span>{darkMode ? '라이트 모드' : '다크 모드'}</span>
+                  </button>
                 </div>
-                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs text-slate-400 font-bold">
-                  <p>💾 Ctrl + S 단축키로 즉시 저장이 가능합니다.</p>
-                  <button onClick={() => { if (confirm('모든 기록을 삭제하시겠습니까?')) { setHistory([]); localStorage.removeItem('roadmap_history'); } }} className="text-red-400 hover:text-red-600 transition-colors">전체 기록 삭제</button>
-                </div>
-              </Modal>
+              </div>
+            </div>
 
-              <div className="max-w-[1750px] mx-auto p-4 md:p-8">
-                <div className={`flex flex-col justify-center items-center mb-6 md:mb-10 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl border-t-[8px] border-brand-600 gap-8 transition-all relative overflow-hidden ${darkMode ? 'bg-slate-900 shadow-brand-950/20' : 'bg-white'}`}>
-                  {/* Book Icon Removed */}
-
-                  <div className="flex flex-col items-center justify-center w-full text-center mt-6 md:mt-0 relative z-10">
-                    <input
-                      value={pageTitle}
-                      onChange={e => setPageTitle(e.target.value)}
-                      spellCheck="false"
-                      className="w-full text-3xl md:text-5xl font-black mb-2 tracking-tighter leading-tight text-slate-800 dark:text-white bg-transparent outline-none text-center"
-                    />
-                    <textarea
-                      value={pageSubtitle}
-                      onChange={e => { setPageSubtitle(e.target.value); handleAutoHeight(e); }}
-                      spellCheck="false"
-                      className="w-full text-slate-500 font-bold text-sm md:text-lg dark:text-gray-300 break-keep bg-transparent outline-none resize-none text-center overflow-hidden"
-                      rows={1}
-                      onFocus={handleAutoHeight}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-3 w-full max-w-5xl mx-auto mt-8">
-                    {/* Row 1: Main Actions + Auth (Gradient descending from #af1d42) */}
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                      <button
-                        onClick={createBackup}
-                        className="bg-[#af1d42] hover:bg-[#911836] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                      >
-                        <Icon name="save" size={18} />
-                        <span>저장하기</span>
-                      </button>
-                      <button
-                        onClick={downloadExcel}
-                        className="bg-[#ba2d4e] hover:bg-[#9c2540] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                      >
-                        <Icon name="table-2" size={18} />
-                        <span>Excel 다운로드</span>
-                      </button>
-                      <button
-                        onClick={downloadImage}
-                        className="bg-[#c53d5a] hover:bg-[#a7334b] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                      >
-                        <Icon name="image-plus" size={18} />
-                        <span>이미지 다운로드</span>
-                      </button>
+            <div id="roadmap-container" ref={roadmapRef} className={`p-5 md:p-10 rounded-[2rem] md:rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-800/50 ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
+              <div className="mb-8 md:mb-12 pb-6 md:pb-8 border-b-2 border-slate-100 dark:border-slate-900 flex flex-wrap gap-4 md:gap-8 items-stretch justify-between">
+                <div className="flex flex-col gap-4 w-full">
+                  <div className="flex flex-wrap gap-3 md:gap-6 items-stretch bg-slate-50 dark:bg-slate-900/80 p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-brand-900/30 shadow-inner w-full transition-all">
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="calendar" className="text-brand-600 dark:text-brand-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">연도</span>
+                      <input type="number" value={startYear} onChange={e => setStartYear(parseInt(e.target.value) || 0)} spellCheck="false" className="w-full bg-transparent text-center font-black text-brand-600 dark:text-brand-400 text-base md:text-xl outline-none" />
                     </div>
-
-                    {/* Row 2: Edit & View Actions (Lighter shades) */}
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                      <button
-                        onClick={() => { window._selectedType = 'textarea'; setModalState({ type: 'addRow' }); }}
-                        className="bg-[#e46d7e] hover:bg-[#c65d6c] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                      >
-                        <Icon name="layers" size={18} />
-                        <span>행 추가</span>
-                      </button>
-                      <button
-                        onClick={() => setModalState({ type: 'manageRows' })}
-                        className="bg-[#ea7584] hover:bg-[#cc6673] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                      >
-                        <Icon name="edit-3" size={18} />
-                        <span>행 관리</span>
-                      </button>
-                      <button
-                        onClick={() => setModalState({ type: 'history' })}
-                        className="bg-[#ef7d8a] hover:bg-[#d16d78] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-1 min-w-[110px]"
-                      >
-                        <Icon name="history" size={18} />
-                        <span>백업 기록 관리</span>
-                      </button>
-                      <button
-                        onClick={() => setDarkMode(!darkMode)}
-                        className="bg-[#f98d96] hover:bg-[#df7d85] text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl flex-1 min-w-[110px]"
-                      >
-                        {darkMode ? <Icon name="sun" size={18} className="text-yellow-200" /> : <Icon name="moon" size={18} />}
-                        <span>{darkMode ? '라이트 모드' : '다크 모드'}</span>
-                      </button>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="user" className="text-brand-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">나이</span>
+                      <input type="number" value={startAge} onChange={e => setStartAge(parseInt(e.target.value) || 0)} spellCheck="false" className="w-full bg-transparent text-center font-black text-brand-400 text-base md:text-xl outline-none" />
                     </div>
-                  </div>
-                </div>
-
-                <div id="roadmap-container" ref={roadmapRef} className={`p-5 md:p-10 rounded-[2rem] md:rounded-[3.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200/50 dark:border-slate-800/50 ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
-                  <div className="mb-8 md:mb-12 pb-6 md:pb-8 border-b-2 border-slate-100 dark:border-slate-900 flex flex-wrap gap-4 md:gap-8 items-stretch justify-between">
-                    <div className="flex flex-col gap-4 w-full">
-                      <div className="flex flex-wrap gap-3 md:gap-6 items-stretch bg-slate-50 dark:bg-slate-900/80 p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 dark:border-brand-900/30 shadow-inner w-full transition-all">
-                        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                          <Icon name="calendar" className="text-brand-600 dark:text-brand-400" size={18} />
-                          <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">연도</span>
-                          <input type="number" value={startYear} onChange={e => setStartYear(parseInt(e.target.value) || 0)} spellCheck="false" className="w-full bg-transparent text-center font-black text-brand-600 dark:text-brand-400 text-base md:text-xl outline-none" />
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                          <Icon name="user" className="text-brand-400" size={18} />
-                          <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">나이</span>
-                          <input type="number" value={startAge} onChange={e => setStartAge(parseInt(e.target.value) || 0)} spellCheck="false" className="w-full bg-transparent text-center font-black text-brand-400 text-base md:text-xl outline-none" />
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                          <Icon name="trending-up" className="text-emerald-500 dark:text-emerald-400" size={18} />
-                          <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">수익률</span>
-                          <div className="flex items-center justify-center w-full">
-                            <input type="number" value={defaultReturn} onChange={e => setDefaultReturn(parseInt(e.target.value) || 0)} spellCheck="false" className="w-12 md:w-20 bg-transparent text-right font-black text-emerald-600 dark:text-emerald-400 text-base md:text-xl outline-none" />
-                            <span className="font-black text-emerald-500 dark:text-emerald-400 text-base md:text-xl ml-1">%</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                          <Icon name="wallet" className="text-brand-500" size={18} />
-                          <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">저축액</span>
-                          <input type="text" value={Number(defaultSavings).toLocaleString()} onChange={e => setDefaultSavings(Number(e.target.value.replace(/,/g, '')) || 0)} spellCheck="false" className="w-full bg-transparent text-center font-black text-brand-500 dark:text-brand-400 text-base md:text-xl outline-none" />
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
-                          <Icon name="coins" className="text-brand-400 pulse-slow shrink-0" size={18} />
-                          <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">단위</span>
-                          <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 w-full md:w-auto">
-                            {['원', '천원', '만원'].map(u => (
-                              <button
-                                key={u}
-                                onClick={() => setSavingsUnit(u)}
-                                className={`flex-1 md:px-3 py-1.5 rounded-md font-black text-[10px] md:text-xs transition-all ${savingsUnit === u
-                                  ? 'bg-brand-600 text-white shadow-md'
-                                  : 'text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-slate-800 font-bold'
-                                  }`}
-                              >
-                                {u}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="trending-up" className="text-emerald-500 dark:text-emerald-400" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">수익률</span>
+                      <div className="flex items-center justify-center w-full">
+                        <input type="number" value={defaultReturn} onChange={e => setDefaultReturn(parseInt(e.target.value) || 0)} spellCheck="false" className="w-12 md:w-20 bg-transparent text-right font-black text-emerald-600 dark:text-emerald-400 text-base md:text-xl outline-none" />
+                        <span className="font-black text-emerald-500 dark:text-emerald-400 text-base md:text-xl ml-1">%</span>
                       </div>
-
                     </div>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-14 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border-2 border-brand-500/10 bg-gradient-to-r from-brand-500/5 via-transparent to-brand-500/5 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block">
-                      <Icon name="target" size={120} />
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="wallet" className="text-brand-500" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">저축액</span>
+                      <input type="text" value={Number(defaultSavings).toLocaleString()} onChange={e => setDefaultSavings(Number(e.target.value.replace(/,/g, '')) || 0)} spellCheck="false" className="w-full bg-transparent text-center font-black text-brand-500 dark:text-brand-400 text-base md:text-xl outline-none" />
                     </div>
-                    <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-600 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-2xl shrink-0 transition-transform hover:scale-105 shadow-brand-900/40">목표</div>
-                    <div className="flex-1 space-y-2 w-full">
-                      <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} spellCheck="false" className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
-                      <textarea
-                        value={goalQuote}
-                        onChange={e => { setGoalQuote(e.target.value); handleAutoHeight(e); }}
-                        spellCheck="false"
-                        className="w-full text-lg md:text-2xl italic bg-transparent outline-none resize-none font-bold text-slate-400 dark:text-white break-keep p-2 text-center md:text-left"
-                        rows={1}
-                        onFocus={handleAutoHeight}
-                      />
-                    </div>
-                  </div>
-
-                  {/* 자산 계산 수식 및 시스템 안내 바 */}
-                  <div id="formula-section" className="mb-10 space-y-4">
-                    <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative overflow-hidden">
-                      <div className="absolute left-0 top-0 w-2 h-full bg-brand-600"></div>
-
-                      {/* 수식 영역 */}
-                      <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl border border-brand-100 dark:border-brand-800">
-                            <span className="font-black text-brand-700 dark:text-brand-300 text-base md:text-lg">연말자산</span>
-                          </div>
-                        </div>
-
-                        <span className="text-2xl font-black text-slate-300 dark:text-slate-700">=</span>
-
-                        <div className="flex flex-col items-center gap-2">
-                          <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">연초자산</span>
-                        </div>
-
-                        <span className="text-2xl font-black text-brand-500/40">+</span>
-
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20">
-                            <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm md:text-base">수익금</span>
-                          </div>
-                          <span className="text-sm md:text-base text-slate-400 dark:text-slate-500 font-black">(연초자산 × 수익률)</span>
-                        </div>
-
-                        <span className="text-2xl font-black text-brand-500/40">+</span>
-
-                        <div className="flex flex-col items-center gap-2">
-                          <span className="font-bold text-orange-500 dark:text-orange-400 text-sm md:text-base">저축액</span>
-                        </div>
-                      </div>
-
-                      {/* 설명 영역 (그리드) */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10">
-                          <div className="w-8 h-8 rounded-lg bg-brand-600 shrink-0 shadow-lg shadow-brand-600/20 flex items-center justify-center border border-brand-400">
-                            {/* icon removed as per request */}
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">실시간 자산 연동 시스템</h4>
-                            <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
-                              올해의 <span className="text-brand-600 font-bold">연말자산</span>은 자동으로 내년도의 <span className="text-brand-600 font-bold">연초자산</span>으로 이월되어 30년 로드맵이 유기적으로 완성됩니다.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-500 shrink-0 shadow-lg shadow-emerald-500/20 flex items-center justify-center border border-emerald-400">
-                            {/* icon removed as per request */}
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">전 항목 자유로운 수기 수정</h4>
-                            <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
-                              연초자산, 수익률, 저축액 등의 항목을 직접 수정할 수 있으며, 수정 시 이후 연도 데이터에 즉시 반영됩니다.
-                            </p>
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-[140px] min-h-[60px]">
+                      <Icon name="coins" className="text-brand-400 pulse-slow shrink-0" size={18} />
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase text-[10px] md:text-[12px] tracking-widest shrink-0">단위</span>
+                      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 w-full md:w-auto">
+                        {['원', '천원', '만원'].map(u => (
+                          <button
+                            key={u}
+                            onClick={() => setSavingsUnit(u)}
+                            className={`flex-1 md:px-3 py-1.5 rounded-md font-black text-[10px] md:text-xs transition-all ${savingsUnit === u
+                              ? 'bg-brand-600 text-white shadow-md'
+                              : 'text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-slate-800 font-bold'
+                              }`}
+                          >
+                            {u}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* 시점 이동 컨트롤러 (표 바로 위로 이동) */}
-                  <div id="timeline-controller" className="mb-10 flex flex-wrap items-center justify-center gap-4 px-2 py-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
-                    <span className="text-sm font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 mr-2 bg-brand-500/10 px-5 py-2 rounded-full border border-brand-500/20">로드맵 시점 이동</span>
-                    <div className="flex gap-3">
-                      {[
-                        { label: '1년 전', val: -1, icon: 'chevron-left', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' },
-                        { label: '오늘', val: 0, icon: 'refresh-cw', color: 'bg-brand-600 text-white z-10 shadow-lg shadow-brand-500/20' },
-                        { label: '1년 후', val: 1, icon: 'chevron-right', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' }
-                      ].map(btn => (
-                        <button
-                          key={btn.label}
-                          onClick={() => {
-                            takeSnapshot();
-                            if (btn.val === 0) {
-                              const todayYear = new Date().getFullYear();
-                              const diff = todayYear - startYear;
-                              setStartYear(todayYear);
-                              setStartAge(prev => prev + diff);
-                            } else {
-                              setStartYear(prev => prev + btn.val);
-                              setStartAge(prev => prev + btn.val);
-                            }
-                          }}
-                          className={`flex items-center justify-center px-6 py-3 rounded-2xl text-sm font-black transition-all active:scale-95 border ${btn.color} hover:border-brand-500 hover:scale-105 w-full md:w-auto`}
-                        >
-                          {btn.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {[0, 10, 20].map(startIndex => renderTable(startIndex))}
                 </div>
               </div>
 
-              {/* 실시간 알림 토스트 (오른쪽 상단) */}
-              {
-                saveToast && (
-                  <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-full">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-brand-900/40 shadow-2xl rounded-2xl px-6 py-4 flex items-center gap-4 min-w-[240px]">
-                      <div className={`p-2 rounded-xl ${saveToast.icon === 'alert-circle' ? 'bg-orange-100 text-orange-500' : 'bg-brand-100 text-brand-600'}`}>
-                        <Icon name={saveToast.icon} size={24} />
+              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-8 md:mb-14 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border-2 border-brand-500/10 bg-gradient-to-r from-brand-500/5 via-transparent to-brand-500/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5 text-brand-900 hidden md:block">
+                  <Icon name="target" size={120} />
+                </div>
+                <div className="w-20 h-20 md:w-24 md:h-24 bg-brand-600 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-2xl shrink-0 transition-transform hover:scale-105 shadow-brand-900/40">목표</div>
+                <div className="flex-1 space-y-2 w-full">
+                  <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} spellCheck="false" className="w-full font-black text-2xl md:text-4xl bg-transparent outline-none tracking-tighter hover:bg-brand-500/5 rounded-xl transition-all p-2 text-slate-800 dark:text-white text-center md:text-left" />
+                  <textarea
+                    value={goalQuote}
+                    onChange={e => { setGoalQuote(e.target.value); handleAutoHeight(e); }}
+                    spellCheck="false"
+                    className="w-full text-lg md:text-2xl italic bg-transparent outline-none resize-none font-bold text-slate-400 dark:text-white break-keep p-2 text-center md:text-left"
+                    rows={1}
+                    onFocus={handleAutoHeight}
+                  />
+                </div>
+              </div>
+
+              {/* 자산 계산 수식 및 시스템 안내 바 */}
+              <div id="formula-section" className="mb-10 space-y-4">
+                <div className="p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-2 h-full bg-brand-600"></div>
+
+                  {/* 수식 영역 */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl border border-brand-100 dark:border-brand-800">
+                        <span className="font-black text-brand-700 dark:text-brand-300 text-base md:text-lg">연말자산</span>
+                      </div>
+                    </div>
+
+                    <span className="text-2xl font-black text-slate-300 dark:text-slate-700">=</span>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-bold text-slate-600 dark:text-slate-400 text-sm md:text-base">연초자산</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-brand-500/40">+</span>
+
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="bg-emerald-500/10 dark:bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20">
+                        <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm md:text-base">수익금</span>
+                      </div>
+                      <span className="text-sm md:text-base text-slate-400 dark:text-slate-500 font-black">(연초자산 × 수익률)</span>
+                    </div>
+
+                    <span className="text-2xl font-black text-brand-500/40">+</span>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-bold text-orange-500 dark:text-orange-400 text-sm md:text-base">저축액</span>
+                    </div>
+                  </div>
+
+                  {/* 설명 영역 (그리드) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10">
+                      <div className="w-8 h-8 rounded-lg bg-brand-600 shrink-0 shadow-lg shadow-brand-600/20 flex items-center justify-center border border-brand-400">
+                        {/* icon removed as per request */}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800 dark:text-white leading-tight">{saveToast.msg}</p>
-                        <p className="text-[10px] text-slate-400 font-bold mt-0.5">Saved Locally</p>
+                        <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">실시간 자산 연동 시스템</h4>
+                        <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
+                          올해의 <span className="text-brand-600 font-bold">연말자산</span>은 자동으로 내년도의 <span className="text-brand-600 font-bold">연초자산</span>으로 이월되어 30년 로드맵이 유기적으로 완성됩니다.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500 shrink-0 shadow-lg shadow-emerald-500/20 flex items-center justify-center border border-emerald-400">
+                        {/* icon removed as per request */}
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">전 항목 자유로운 수기 수정</h4>
+                        <p className="text-slate-500 dark:text-slate-100 text-xs md:text-sm leading-relaxed font-medium">
+                          연초자산, 수익률, 저축액 등의 항목을 직접 수정할 수 있으며, 수정 시 이후 연도 데이터에 즉시 반영됩니다.
+                        </p>
                       </div>
                     </div>
                   </div>
-                )
-              }
-            </div >
-            );
+                </div>
+              </div>
+
+              {/* 시점 이동 컨트롤러 (표 바로 위로 이동) */}
+              <div id="timeline-controller" className="mb-10 flex flex-wrap items-center justify-center gap-4 px-2 py-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800">
+                <span className="text-sm font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 mr-2 bg-brand-500/10 px-5 py-2 rounded-full border border-brand-500/20">로드맵 시점 이동</span>
+                <div className="flex gap-3">
+                  {[
+                    { label: '1년 전', val: -1, icon: 'chevron-left', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' },
+                    { label: '오늘', val: 0, icon: 'refresh-cw', color: 'bg-brand-600 text-white z-10 shadow-lg shadow-brand-500/20' },
+                    { label: '1년 후', val: 1, icon: 'chevron-right', color: 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 border-slate-200 dark:border-slate-700' }
+                  ].map(btn => (
+                    <button
+                      key={btn.label}
+                      onClick={() => {
+                        takeSnapshot();
+                        if (btn.val === 0) {
+                          const todayYear = new Date().getFullYear();
+                          const diff = todayYear - startYear;
+                          setStartYear(todayYear);
+                          setStartAge(prev => prev + diff);
+                        } else {
+                          setStartYear(prev => prev + btn.val);
+                          setStartAge(prev => prev + btn.val);
+                        }
+                      }}
+                      className={`flex items-center justify-center px-6 py-3 rounded-2xl text-sm font-black transition-all active:scale-95 border ${btn.color} hover:border-brand-500 hover:scale-105 w-full md:w-auto`}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {[0, 10, 20].map(startIndex => renderTable(startIndex))}
+            </div>
+          </div>
+
+          {/* 실시간 알림 토스트 (오른쪽 상단) */}
+          {
+            saveToast && (
+              <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-full">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-brand-900/40 shadow-2xl rounded-2xl px-6 py-4 flex items-center gap-4 min-w-[240px]">
+                  <div className={`p-2 rounded-xl ${saveToast.icon === 'alert-circle' ? 'bg-orange-100 text-orange-500' : 'bg-brand-100 text-brand-600'}`}>
+                    <Icon name={saveToast.icon} size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-800 dark:text-white leading-tight">{saveToast.msg}</p>
+                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">Saved Locally</p>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+        </div >
+      );
     };
 
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<App />);
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 
