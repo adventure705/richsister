@@ -1050,6 +1050,12 @@
                 }
               });
 
+              // 이미지 라이브러리/다운로드 시 공란 처리 (placeholder 숨기기)
+              const placeholders = clonedDoc.querySelectorAll('.img-placeholder');
+              placeholders.forEach(p => {
+                p.style.display = 'none';
+              });
+
               const tbls = clonedDoc.querySelectorAll('table');
               tbls.forEach(t => {
                 t.style.width = '100%';
@@ -1294,10 +1300,10 @@
                                 e.stopPropagation();
                                 deleteRow(row.id);
                               }}
-                              className="absolute right-1 top-1 p-1.5 bg-red-500/10 text-red-500/40 hover:text-red-600 hover:bg-red-500/20 opacity-100 transition-all z-20 cursor-pointer rounded-lg"
+                              className="absolute right-1 top-1 p-2 text-red-500/40 hover:text-red-600 transition-all z-20 cursor-pointer"
                               title="행 삭제"
                             >
-                              <Icon name="trash-2" size={16} />
+                              <div className="w-2 h-2 rounded-full bg-current shadow-sm shadow-red-500/20"></div>
                             </button>
 
                             <div className="flex items-center justify-center gap-2">
@@ -1381,7 +1387,10 @@
                                     </div>
                                   </>
                                 ) : (
-                                  <><Icon name="plus" size={24} className="text-slate-300 mb-1" /><span className="text-[10px] font-bold text-slate-400">이미지 추가</span></>
+                                  <div className="img-placeholder flex flex-col items-center justify-center">
+                                    <Icon name="plus" size={14} className="text-slate-300 mb-1" />
+                                    <span className="text-[10px] font-bold text-slate-400">이미지 추가</span>
+                                  </div>
                                 )}
                               </div>
                             );
@@ -1915,8 +1924,8 @@
                   {/* 설명 영역 (그리드) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
                     <div className="flex items-start gap-4 p-4 rounded-2xl bg-brand-500/5 border border-brand-500/10">
-                      <div className="bg-brand-600 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-brand-600/20">
-                        <Icon name="refresh-cw" size={20} />
+                      <div className="w-8 h-8 rounded-lg bg-brand-600 shrink-0 shadow-lg shadow-brand-600/20 flex items-center justify-center border border-brand-400">
+                        {/* icon removed as per request */}
                       </div>
                       <div>
                         <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">실시간 자산 연동 시스템</h4>
@@ -1927,8 +1936,8 @@
                     </div>
 
                     <div className="flex items-start gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
-                      <div className="bg-emerald-500 text-white p-2 rounded-xl shrink-0 shadow-lg shadow-emerald-500/20">
-                        <Icon name="edit-3" size={20} />
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500 shrink-0 shadow-lg shadow-emerald-500/20 flex items-center justify-center border border-emerald-400">
+                        {/* icon removed as per request */}
                       </div>
                       <div>
                         <h4 className="font-black text-slate-800 dark:text-white text-sm mb-1">전 항목 자유로운 수기 수정</h4>
