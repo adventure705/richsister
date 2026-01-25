@@ -127,7 +127,9 @@
         'layers': '➕', 'history': '🕒', 'sun': '☀️', 'moon': '🌙',
         'book-open': '📖', 'calendar': '📅', 'user': '👤',
         'check-circle': '✅', 'alert-triangle': '⚠️', 'info': 'ℹ️', 'database-zap': '⚡', 'cpu': '🤖',
-        'chevron-left': '◀️', 'chevron-right': '▶️'
+        'chevron-left': '◀️', 'chevron-right': '▶️', 'x': '❌', 'loader': '🔄', 'cloud': '☁️',
+        'grip-vertical': '⠿', 'trash-2': '🗑️', 'plus': '➕', 'refresh-cw': '🔄', 'edit-3': '📝',
+        'target': '🎯', 'map': '🗺️', 'trending-up': '📈', 'wallet': '👛', 'coins': '💰'
       };
       // 우선 화면 복구를 위해 SVG 렌더링을 중단하고 이모지만 보여줍니다.
       return <span style={{ fontSize: size, lineHeight: 1 }} className={className}>{emojis[name] || ''}</span>;
@@ -784,6 +786,17 @@
           : '선택한 행을 로드맵에서 삭제하시겠습니까?';
 
         setModalState({ type: 'confirmDelete', data: { id, msg, isSystem } });
+      };
+
+      const addRow = (label, type, operator) => {
+        takeSnapshot();
+        const newId = `row_${Date.now()}`;
+        setAllRows(prev => [...prev, { id: newId, label, type, operator }]);
+      };
+
+      const updateRowInfo = (id, label, type, operator) => {
+        takeSnapshot();
+        setAllRows(prev => prev.map(r => r.id === id ? { ...r, label, type, operator } : r));
       };
 
       const executeDelete = () => {
