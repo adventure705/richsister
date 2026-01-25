@@ -78,6 +78,33 @@
         transform: scale(1);
       }
     }
+
+    /* 커스텀 스크롤바 스타일 (상하단 노출) */
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #af1d4260;
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #af1d42;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #af1d4280;
+    }
   </style>
 </head>
 
@@ -1170,12 +1197,6 @@
         }
       };
 
-      const scrollTable = (idx, amount) => {
-        const container = document.getElementById(`table-container-${idx}`);
-        if (container) {
-          container.scrollBy({ left: amount, behavior: 'smooth' });
-        }
-      };
 
       const renderTable = (startIndex) => {
         const chunk = items.slice(startIndex, startIndex + 10);
@@ -1184,15 +1205,35 @@
         const rowHeaderBg = darkMode ? 'bg-slate-800/80' : 'bg-slate-50';
 
         return (
-          <div key={startIndex} className={`mb-8 md:mb-12 overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm border ${borderColor} p-4 md:p-6 ${darkMode ? 'bg-slate-900 shadow-brand-950/20' : 'bg-white'} transition-all`}>
+          <div className={`mb-8 md:mb-12 overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm border ${borderColor} p-4 md:p-6 ${darkMode ? 'bg-slate-900 shadow-brand-950/20' : 'bg-white'} transition-all`}>
             <div className="flex items-center justify-between mb-4 md:mb-6 px-2">
               <h2 className={`text-xl md:text-3xl font-black flex items-center gap-4 ${darkMode ? 'text-brand-300' : 'text-brand-700'} tracking-tighter`}>
                 <span className="text-3xl md:text-4xl drop-shadow-md">👑</span>
                 {startYear + startIndex}년 ~ {startYear + startIndex + 9}년
               </h2>
-
             </div>
-            <div id={`table-container-${startIndex}`} className="overflow-x-auto scrollbar-hide pb-2">
+
+            {/* 상단 스크롤바 (하단과 동기화) */}
+            <div
+              id={`top-scroll-${startIndex}`}
+              data-html2canvas-ignore="true"
+              onScroll={(e) => {
+                const bottom = document.getElementById(`table-container-${startIndex}`);
+                if (bottom) bottom.scrollLeft = e.target.scrollLeft;
+              }}
+              className="overflow-x-auto custom-scrollbar h-2 mb-1"
+            >
+              <div style={{ width: '1400px', height: '1px' }}></div>
+            </div>
+
+            <div
+              id={`table-container-${startIndex}`}
+              onScroll={(e) => {
+                const top = document.getElementById(`top-scroll-${startIndex}`);
+                if (top) top.scrollLeft = e.target.scrollLeft;
+              }}
+              className="overflow-x-auto custom-scrollbar pb-2"
+            >
               <table className={`w-full border-collapse border border-slate-200 dark:border-brand-900/30 text-[11px] table-fixed min-w-[1400px]`}>
                 <thead>
                   <tr className={`${headerBg} text-white shadow-lg relative`}>
@@ -1355,30 +1396,6 @@
                   })}
                 </tbody>
               </table>
-            </div>
-
-            {/* 시점 이동 슬라이드 버튼 (테이블이 넓어서 1500px 미만 시 노출) */}
-            <div className="flex items-center justify-center gap-8 mt-6 2xl:hidden">
-              <button
-                onClick={() => scrollTable(startIndex, -400)}
-                className="w-16 h-16 rounded-full bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-brand-600 active:scale-90 transition-all hover:bg-brand-50 dark:hover:bg-slate-700"
-              >
-                <Icon name="chevron-left" size={32} />
-              </button>
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-black text-brand-500 uppercase tracking-widest mb-1 select-none">Slide</span>
-                <div className="flex gap-1.5">
-                  <div className={`w-2 h-2 rounded-full transition-all ${startIndex === 0 ? 'bg-brand-600 scale-125' : 'bg-slate-300'}`}></div>
-                  <div className={`w-2 h-2 rounded-full transition-all ${startIndex === 10 ? 'bg-brand-600 scale-125' : 'bg-slate-300'}`}></div>
-                  <div className={`w-2 h-2 rounded-full transition-all ${startIndex === 20 ? 'bg-brand-600 scale-125' : 'bg-slate-300'}`}></div>
-                </div>
-              </div>
-              <button
-                onClick={() => scrollTable(startIndex, 400)}
-                className="w-16 h-16 rounded-full bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-brand-600 active:scale-90 transition-all hover:bg-brand-50 dark:hover:bg-slate-700"
-              >
-                <Icon name="chevron-right" size={32} />
-              </button>
             </div>
           </div>
         );
