@@ -254,6 +254,7 @@
         if (data.goalTitle) setGoalTitle(data.goalTitle);
         if (data.goalQuote) setGoalQuote(data.goalQuote);
         if (data.savingsUnit) setSavingsUnit(data.savingsUnit);
+        setRoadmapYears(Number(data.roadmapYears) >= 30 ? Number(data.roadmapYears) : 30);
         if (data.allRows) {
           let rows = data.allRows.filter(r => r.id !== 'investedAssets');
           if (!rows.find(r => r.id === 'profit')) {
@@ -392,6 +393,7 @@
           { id: 'visualization', label: '시각화', type: 'image' }
         ]);
         setYearDataStore({});
+        setRoadmapYears(30);
         setDarkMode(false);
       };
 
@@ -421,21 +423,7 @@
 
       // 연도별 데이터 마스터 저장소 (연도 이동 시 복원용)
       const [yearDataStore, setYearDataStore] = useState({});
-
-      // [중요] 비동기 함수(저장/자동저장)에서 최신 상태를 참조하기 위한 Ref
-      const latestStateRef = useRef({
-        pageTitle, pageSubtitle, startAge, startYear,
-        defaultReturn, defaultSavings, goalTitle, goalQuote,
-        savingsUnit, allRows, yearDataStore, items, darkMode
-      });
-
-      useEffect(() => {
-        latestStateRef.current = {
-          pageTitle, pageSubtitle, startAge, startYear,
-          defaultReturn, defaultSavings, goalTitle, goalQuote,
-          savingsUnit, allRows, yearDataStore, items, darkMode
-        };
-      }, [pageTitle, pageSubtitle, startAge, startYear, defaultReturn, defaultSavings, goalTitle, goalQuote, savingsUnit, allRows, yearDataStore, items, darkMode]);
+      const [roadmapYears, setRoadmapYears] = useState(30);
 
       // 실행 취소 / 다시 실행 스택
       const [undoStack, setUndoStack] = useState([]);
@@ -455,7 +443,7 @@
         const snapshot = {
           pageTitle, pageSubtitle, startAge, startYear,
           defaultReturn, defaultSavings, goalTitle, goalQuote,
-          savingsUnit, allRows, yearDataStore, items, darkMode
+          savingsUnit, allRows, yearDataStore, items, roadmapYears, darkMode
         };
         setUndoStack(prev => [...prev.slice(-49), snapshot]); // 최대 50개 저장
         setRedoStack([]);
@@ -474,6 +462,7 @@
         setAllRows(snapshot.allRows);
         setYearDataStore(snapshot.yearDataStore);
         setItems(snapshot.items);
+        setRoadmapYears(snapshot.roadmapYears || 30);
         setDarkMode(snapshot.darkMode);
       };
 
@@ -482,7 +471,7 @@
         const current = {
           pageTitle, pageSubtitle, startAge, startYear,
           defaultReturn, defaultSavings, goalTitle, goalQuote,
-          savingsUnit, allRows, yearDataStore, items, darkMode
+          savingsUnit, allRows, yearDataStore, items, roadmapYears, darkMode
         };
         const previous = undoStack[undoStack.length - 1];
         setRedoStack(prev => [...prev, current]);
@@ -495,7 +484,7 @@
         const current = {
           pageTitle, pageSubtitle, startAge, startYear,
           defaultReturn, defaultSavings, goalTitle, goalQuote,
-          savingsUnit, allRows, yearDataStore, items, darkMode
+          savingsUnit, allRows, yearDataStore, items, roadmapYears, darkMode
         };
         const next = redoStack[redoStack.length - 1];
         setUndoStack(prev => [...prev, current]);
@@ -642,7 +631,7 @@
       };
 
       const [items, setItems] = useState(() => {
-        const arr = Array.from({ length: 30 }, (_, i) => {
+        const arr = Array.from({ length: roadmapYears }, (_, i) => {
           const year = startYear + i;
           const store = yearDataStore?.[year] || {};
           return {
@@ -659,12 +648,27 @@
         return arr;
       });
 
+      // 비동기 저장에서도 사용자가 확장한 전체 기간을 포함한 최신 상태를 참조합니다.
+      const latestStateRef = useRef({
+        pageTitle, pageSubtitle, startAge, startYear,
+        defaultReturn, defaultSavings, goalTitle, goalQuote,
+        savingsUnit, allRows, yearDataStore, items, roadmapYears, darkMode
+      });
+
+      useEffect(() => {
+        latestStateRef.current = {
+          pageTitle, pageSubtitle, startAge, startYear,
+          defaultReturn, defaultSavings, goalTitle, goalQuote,
+          savingsUnit, allRows, yearDataStore, items, roadmapYears, darkMode
+        };
+      }, [pageTitle, pageSubtitle, startAge, startYear, defaultReturn, defaultSavings, goalTitle, goalQuote, savingsUnit, allRows, yearDataStore, items, roadmapYears, darkMode]);
+
       // 연도 이동 시 데이터 복원 및 동기화 (연속성 확보 버전)
       useEffect(() => {
         setItems(prev => {
           // 1. 기준연도(2026)부터 마지막 가용 연도까지의 전역 데이터 흐름 계산
           const baseYear = 2026;
-          const endYear = startYear + 30;
+          const endYear = startYear + roadmapYears - 1;
           const fullTimeline = {};
 
           // 시뮬레이션: 기준점부터 현재 화면 끝까지 계산
@@ -705,8 +709,8 @@
             currentBeg = finalYearEnd;
           }
 
-          // 2. 현재 startYear 시점에 해당하는 30년치 데이터 슬라이싱
-          const newItems = Array.from({ length: 30 }, (_, i) => {
+          // 2. 현재 startYear 시점에 해당하는 사용자 설정 기간 데이터 슬라이싱
+          const newItems = Array.from({ length: roadmapYears }, (_, i) => {
             const year = startYear + i;
             // yearDataStore에 있는 데이터가 우선
             const calculated = fullTimeline[year];
@@ -723,7 +727,7 @@
 
           return newItems;
         });
-      }, [startYear, defaultReturn, defaultSavings, yearDataStore, allRows]);
+      }, [startYear, defaultReturn, defaultSavings, yearDataStore, allRows, roadmapYears]);
 
       const [modalState, setModalState] = useState({
         type: null, // 'header', 'addRow', 'editRow'
@@ -1014,7 +1018,7 @@
         const tables = container.querySelectorAll('.mb-8.md\\:mb-12.overflow-hidden.rounded-\\[1\\.5rem\\]');
         if (tables.length === 0) return;
 
-        setModalState({ type: 'status', data: { title: "이미지 생성 중", msg: "3개의 테이블 블록을 개별 이미지로 저장합니다...", icon: "loader", animate: true } });
+        setModalState({ type: 'status', data: { title: "이미지 생성 중", msg: `${tables.length}개의 테이블 블록을 개별 이미지로 저장합니다...`, icon: "loader", animate: true } });
 
         // 첫 번째 이미지에는 상단 정보(헤더+목표)를 포함할지 여부 결정
         // 여기서는 각 테이블 블록만 깔끔하게 저장하는 방식으로 구현
@@ -1075,7 +1079,7 @@
           await new Promise(resolve => setTimeout(resolve, 500));
         }
 
-        setModalState({ type: 'status', data: { title: "저장 완료", msg: "3개의 조각 이미지가 다운로드되었습니다.", icon: "check-circle" } });
+        setModalState({ type: 'status', data: { title: "저장 완료", msg: `${tables.length}개의 조각 이미지가 다운로드되었습니다.`, icon: "check-circle" } });
       };
 
       const downloadExcel = async () => {
@@ -1106,11 +1110,11 @@
           worksheet.addRow(['[나의 명언]', goalQuote]).font = { italic: true };
           worksheet.addRow([]);
           worksheet.addRow(['[기준 정보]', `시작 연도: ${startYear}년 / 시작 나이: ${startAge}세 / 화폐 단위: ${savingsUnit}`]);
-          worksheet.addRow(['* 참고: 30년 인생 시나리오가 10년 단위로 구성되어 있습니다.']);
+          worksheet.addRow([`* 참고: ${roadmapYears}년 인생 시나리오가 10년 단위로 구성되어 있습니다.`]);
           worksheet.addRow([]);
 
-          // 2. 메인 데이터 테이블 구성 (10년씩 3단계로 분할)
-          for (const blockStartIndex of [0, 10, 20]) {
+          // 2. 메인 데이터 테이블 구성 (사용자 설정 기간을 10년씩 분할)
+          for (const blockStartIndex of Array.from({ length: roadmapYears / 10 }, (_, i) => i * 10)) {
             const chunk = items.slice(blockStartIndex, blockStartIndex + 10);
 
             // 각 블록의 헤더
@@ -1207,7 +1211,7 @@
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `인생_로드맵_30년_이미지포함.xlsx`;
+          link.download = `인생_로드맵_${roadmapYears}년_이미지포함.xlsx`;
           link.click();
           window.URL.revokeObjectURL(url);
           setModalState({ type: 'status', data: { title: "저장 완료", msg: "이미지가 포함된 엑셀 파일 다운로드가 완료되었습니다!", icon: "check-circle" } });
@@ -2025,7 +2029,21 @@
                 </div>
               </div>
 
-              {[0, 10, 20].map(startIndex => renderTable(startIndex))}
+              {Array.from({ length: roadmapYears / 10 }, (_, i) => i * 10).map(startIndex => renderTable(startIndex))}
+
+              <div className="flex justify-center mt-2 mb-6" data-html2canvas-ignore="true">
+                <button
+                  onClick={() => {
+                    takeSnapshot();
+                    setRoadmapYears(prev => prev + 10);
+                    triggerToast("로드맵에 10년이 추가되었습니다");
+                  }}
+                  className="bg-brand-600 hover:bg-brand-700 text-white px-7 py-3 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95"
+                >
+                  <Icon name="plus" size={18} />
+                  <span>10년 추가</span>
+                </button>
+              </div>
             </div>
           </div>
 
